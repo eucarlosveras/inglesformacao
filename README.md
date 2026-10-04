@@ -1,4 +1,6 @@
-# Inglês em Formação
+# Falaê
+
+*Inglês do zero ao avançado.* (repositório: `inglesformacao`)
 
 Plataforma de estudos de inglês em três níveis, do zero ao avançado, guiada pelos livros da série *Grammar in Use* (Cambridge).
 

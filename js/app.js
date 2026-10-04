@@ -293,7 +293,7 @@ window.addEventListener('hashchange',route);
 
 /* ---------- inicio ---------- */
 function renderHome(){
-  document.title='Inglês em Formação';
+  document.title='Falaê · inglês do zero ao avançado';
   const nm=nextModule();
   const started=totalDone()>0||Object.keys(S.m).length>0;
   const X=[0,52,80,52,0,-52,-80,-52];
@@ -318,7 +318,7 @@ function renderHome(){
 
 /* ---------- modulos ---------- */
 function renderModules(f){
-  document.title='Módulos · Inglês em Formação';
+  document.title='Módulos · Falaê';
   const sel=byLv[f]?[byLv[f]]:LVS;
   V.innerHTML=`<p class="crumb"><a href="#/inicio">início</a> / módulos</p><h1>Módulos</h1>
   <p class="sub">Todos os ${ALLMODS.length} módulos da trilha, em ordem de dificuldade. Cada um cobre um grupo de unidades do livro do nível.</p>
@@ -334,7 +334,7 @@ function renderModules(f){
 
 /* ---------- nivel ---------- */
 function renderLevel(L){
-  document.title=L.name+' · Inglês em Formação';
+  document.title=L.name+' · Falaê';
   const d=lvUnitsDone(L),p=pct(d,L.units.length);
   V.innerHTML=`<p class="crumb"><a href="#/inicio">início</a> / nível ${esc(L.name.toLowerCase())}</p>
   <section class="sheet"><div class="course-head"><div class="hero" style="flex:1;min-width:260px"><div class="acell" style="--cc:${L.color}"><small>${L.cefr}</small>${L.code}</div><div>
@@ -352,7 +352,7 @@ function bindPdf(){$$('[data-pdf]').forEach(b=>b.onclick=()=>openPdf(b.dataset.p
 /* ---------- modulo ---------- */
 function renderMod(m){
   const L=m.lv;S.last=m.key;save();
-  document.title=m.code+' '+m.t+' · Inglês em Formação';
+  document.title=m.code+' '+m.t+' · Falaê';
   const prev=L.mods[m.i-1]||(LVS[L.idx-1]&&LVS[L.idx-1].mods.slice(-1)[0]);
   const next=L.mods[m.i+1]||(LVS[L.idx+1]&&LVS[L.idx+1].mods[0]);
   const drill=m.drill.map((d,k)=>{const id=m.key+'-d'+k;const parts=d[0].split('___');const w=Math.max(6,Math.max(...d[1].split('|').map(s=>s.length))+2);
@@ -562,7 +562,7 @@ function openGam(){
 
 /* ---------- nivelamento ---------- */
 function renderPlace(){
-  document.title='Teste de nivelamento · Inglês em Formação';
+  document.title='Teste de nivelamento · Falaê';
   V.innerHTML=`<p class="crumb"><a href="#/inicio">início</a> / nivelamento</p>
   <section class="sheet"><div class="hero"><div class="acell ac"><small>teste</small>?</div><div><h1>Teste de nivelamento</h1>
   <p class="sub" style="margin-top:.4rem">São 18 questões sorteadas: 6 do nível Inicial, 6 do Intermediário e 6 do Avançado. No fim, a plataforma indica por qual nível começar. Leva uns 10 minutos.</p>
@@ -585,7 +585,7 @@ function renderPlace(){
 
 /* ---------- busca ---------- */
 function renderSearch(q){
-  document.title='Buscar · Inglês em Formação';
+  document.title='Buscar · Falaê';
   V.innerHTML=`<p class="crumb"><a href="#/inicio">início</a> / busca</p><h1>Buscar</h1>
   <p class="sub">Procure por tema (ex.: <em>present perfect</em>, <em>preposições</em>, <em>phrasal verbs</em>) em módulos e unidades dos três livros.</p>
   <input type="search" id="sq" placeholder="Digite pelo menos 2 letras…" value="${esc(q)}" style="width:100%;max-width:560px" aria-label="Buscar"><div id="sres" style="margin-top:1rem"></div>`;
@@ -607,7 +607,7 @@ function renderSearch(q){
 
 /* ---------- progresso ---------- */
 function renderProg(){
-  document.title='Progresso · Inglês em Formação';
+  document.title='Progresso · Falaê';
   const drOk=Object.keys(S.dr).length,drTot=ALLMODS.reduce((a,m)=>a+m.drill.length,0);
   V.innerHTML=`<p class="crumb"><a href="#/inicio">início</a> / progresso</p><h1>Meu progresso</h1>
   <div class="grid">
@@ -635,7 +635,7 @@ function renderProg(){
 
 /* ---------- livros ---------- */
 function renderBooks(){
-  document.title='Meus livros · Inglês em Formação';
+  document.title='Meus livros · Falaê';
   V.innerHTML=`<p class="crumb"><a href="#/inicio">início</a> / livros</p><h1>Meus livros (PDF)</h1>
   <p class="sub">Os PDFs não ficam no site, por direitos autorais e pelo tamanho. Carregue cada arquivo uma vez: ele fica guardado só neste navegador, e os botões “PDF p.” passam a abrir a página exata de cada unidade.</p>
   ${isLocal()?'<div class="call k-dica"><div class="lab">Rodando localmente</div><p>Os PDFs na mesma pasta do <code>index.html</code>, com os nomes abaixo, já abrem direto. Não é preciso carregar nada.</p></div>':''}

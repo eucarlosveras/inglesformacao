@@ -1,6 +1,6 @@
 window.LV=window.LV||[];
 LV.push({
-id:'inicial',name:'Inicial',code:'IN',cefr:'A1–A2',d:1,color:'#16a34a',
+id:'inicial',name:'Inicial',code:'IN',cefr:'A1–A2',d:1,color:'#58CC02',dark:'#58A700',
 book:'Essential Grammar in Use',author:'Raymond Murphy',ed:'Cambridge',
 file:'Essential Grammar in Use - Raymond Murphy - Inicial.pdf',pdf0:7,
 desc:'A base do idioma: verbo <i>to be</i>, presente, passado, futuro, perguntas, artigos, pronomes e preposições. Para quem está começando ou quer revisar o essencial com segurança.',

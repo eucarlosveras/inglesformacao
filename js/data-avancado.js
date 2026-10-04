@@ -1,6 +1,6 @@
 window.LV=window.LV||[];
 LV.push({
-id:'avancado',name:'Avançado',code:'AV',cefr:'C1–C2',d:3,color:'#dc2626',
+id:'avancado',name:'Avançado',code:'AV',cefr:'C1–C2',d:3,color:'#CE82FF',dark:'#A568CC',
 book:'Advanced Grammar in Use',author:'Martin Hewings',ed:'2ª edição',
 file:'Advanced Grammar in Use - Martin Hewings - Avancado.pdf',pdf0:11,
 desc:'Refinamento para quem já se comunica bem: nuances dos tempos verbais, subjuntivo, concordância, artigos em detalhe, orações participiais, elipse, adjetivos graduáveis, condicionais mistas, foco e inversão.',

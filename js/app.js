@@ -113,8 +113,40 @@ const ICO={
   cards:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/></svg>',
   quiz:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.8-2.5 2.2-2.5 3.9M12 17.2v.1"/></svg>',
   book:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M8 7h7"/></svg>',
-  fire:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1.2 3.4-1 4.6-1 6.8a3 3 0 0 0 5.8.9c1.6 2 2.2 3.7 2.2 5.6A7 7 0 1 1 6.2 12c1.2 1.2 2.4 1.1 3 0 .9-1.7-.7-3.3.4-5C10.8 5.6 12 4.2 12 2z"/></svg>'
+  fire:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1.2 3.4-1 4.6-1 6.8a3 3 0 0 0 5.8.9c1.6 2 2.2 3.7 2.2 5.6A7 7 0 1 1 6.2 12c1.2 1.2 2.4 1.1 3 0 .9-1.7-.7-3.3.4-5C10.8 5.6 12 4.2 12 2z"/></svg>',
+  star:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5-4.7-4.6 6.5-.9z"/></svg>',
+  check:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5L19.5 7" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  x:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5L19.5 7"/></svg>',
+  trophy:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v6a5 5 0 0 1-10 0zM17 4h3.5v2.5A4 4 0 0 1 17 10.4M7 4H3.5v2.5A4 4 0 0 0 7 10.4M10 14.5h4v3h-4zM7.5 21a4.5 4.5 0 0 1 9 0z"/></svg>',
+  guide:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 5.5C5 4 8.5 4 12 6c3.5-2 7-2 9.5-.5V19c-2.5-1.5-6-1.5-9.5.5-3.5-2-7-2-9.5-.5z"/><path d="M12 6v13.5"/></svg>',
+  bolt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>'
 };
+/* mascote: balãozinho de fala */
+function mascotSVG(c,mood){
+  c=c||'#58CC02';
+  const mouth=mood==='sad'?'<path d="M48 78q12-9 24 0" stroke="#2b2b2b" stroke-width="5" fill="none" stroke-linecap="round"/>':mood==='wow'?'<ellipse cx="60" cy="74" rx="8" ry="9" fill="#2b2b2b"/><ellipse cx="60" cy="78" rx="5" ry="4" fill="#ff6b81"/>':'<path d="M46 70q14 14 28 0" stroke="#2b2b2b" stroke-width="5" fill="#fff" stroke-linecap="round" stroke-linejoin="round"/>';
+  return `<svg viewBox="0 0 120 120" aria-hidden="true"><path d="M60 8c28 0 50 19 50 44s-22 44-50 44c-6 0-12-1-17-3L18 108l7-22C14 78 10 66 10 52 10 27 32 8 60 8z" fill="${c}"/><path d="M60 8c28 0 50 19 50 44 0 5-1 10-3 15-6-20-26-35-47-35S20 47 13 67c-2-5-3-10-3-15C10 27 32 8 60 8z" fill="#fff" opacity=".18"/><ellipse cx="44" cy="48" rx="13" ry="15" fill="#fff"/><ellipse cx="76" cy="48" rx="13" ry="15" fill="#fff"/><circle cx="47" cy="51" r="7" fill="#2b2b2b"/><circle cx="79" cy="51" r="7" fill="#2b2b2b"/><circle cx="49.5" cy="48" r="2.4" fill="#fff"/><circle cx="81.5" cy="48" r="2.4" fill="#fff"/>${mouth}<ellipse cx="31" cy="66" rx="6" ry="4" fill="#ff8fa3" opacity=".55"/><ellipse cx="89" cy="66" rx="6" ry="4" fill="#ff8fa3" opacity=".55"/></svg>`;
+}
+const lvStyle=L=>`--lc:${L.color};--lcd:${L.dark||L.color}`;
+/* sons curtos (Web Audio) */
+let AC=null;
+function tone(kind){
+  if(S.sound===false)return;
+  try{
+    AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+    const t=AC.currentTime;
+    const seq=kind==='ok'?[[784,0,'sine'],[1047,.09,'sine']]:kind==='win'?[[523,0,'triangle'],[659,.1,'triangle'],[784,.2,'triangle'],[1047,.3,'triangle']]:[[233,0,'triangle'],[196,.13,'triangle']];
+    seq.forEach(([f,d,type])=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.2,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.22);o.connect(g);g.connect(AC.destination);o.start(t+d);o.stop(t+d+.25);});
+  }catch(e){}
+}
+function confetti(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  const box=document.createElement('div');box.className='confetti';
+  const cols=['#58CC02','#1CB0F6','#FF9600','#FFC800','#CE82FF','#FF4B4B'];
+  for(let i=0;i<90;i++){const p=document.createElement('i');p.style.left=Math.random()*100+'%';p.style.background=cols[i%cols.length];p.style.setProperty('--dx',(Math.random()*200-100)+'px');p.style.setProperty('--r',(Math.random()*720-360)+'deg');p.style.animationDuration=(1.6+Math.random()*1.6)+'s';p.style.animationDelay=(Math.random()*.4)+'s';box.appendChild(p);}
+  document.body.appendChild(box);setTimeout(()=>box.remove(),3800);
+}
 
 /* ---------- dados ---------- */
 const LVS=window.LV||[];
@@ -171,23 +203,38 @@ function applyPrefs(){
   document.documentElement.style.setProperty('--fs',S.fs+'px');
   document.body.classList.toggle('focus',!!S.focus);
   $('#focusbtn').setAttribute('aria-pressed',S.focus?'true':'false');
+  $('#soundbtn').setAttribute('aria-pressed',S.sound===false?'false':'true');
   const dark=S.theme?S.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;
   $('#themebtn').setAttribute('aria-pressed',dark?'true':'false');
 }
+$('#soundbtn').onclick=()=>{S.sound=S.sound===false;applyPrefs();save();if(S.sound)tone('ok');toast(S.sound?'Sons ativados':'Sons desativados');};
+$('#xpchip').onclick=()=>openGam();
+$('#lvchip').onclick=()=>openGam();
+['#logomark','#logomark2'].forEach(s=>{const e=$(s);if(e)e.innerHTML=mascotSVG('#58CC02');});
 $('#themebtn').onclick=()=>{const dark=S.theme?S.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;S.theme=dark?'light':'dark';applyPrefs();save();};
 $('#fontbtn').onclick=()=>{S.fs=S.fs>=21?15:S.fs+2;applyPrefs();save();toast('Fonte: '+S.fs+'px');};
 $('#focusbtn').onclick=()=>{S.focus=!S.focus;applyPrefs();save();toast(S.focus?'Modo foco ativado':'Modo foco desativado');};
 $('#gamchip').onclick=openGam;
 
 function updTop(){
-  $('#progtop').style.width=pct(totalDone(),totalUnits())+'%';
   const s=streak();$('#gcstreak').textContent=s;$('#gamchip').classList.toggle('on',!!S.gam.days[dayKey()]);
-  $('#gclv').textContent='Nv '+gLevel();
+  $('#gcxp').textContent=S.gam.xp||0;
+  $('#gclv').textContent=gLevel();
+  if(document.body.classList.contains('has-rail'))renderRail();
 }
-function buildMenus(){
-  $('#menupanel').innerHTML=LVS.map(L=>`<details${S.last&&S.last.startsWith(L.id)?' open':''}><summary><span class="dot" style="--dotc:${L.color}"></span>${esc(L.name)} <span class="diff-mark d${L.d}">${L.cefr}</span><span style="margin-left:auto;font-family:var(--f-mono);font-size:.75rem;color:var(--muted)">${pct(lvUnitsDone(L),L.units.length)}%</span></summary>
-    <div class="parts"><a href="#/nivel/${L.id}"><small>▸</small>Visão geral do nível</a>${L.mods.map(m=>`<a href="#/modulo/${L.id}/${m.i}"><small>${m.code}</small>${esc(m.t)}</a>`).join('')}</div></details>`).join('')+
-    `<div class="parts" style="padding:.5rem 0 0"><a href="#/modulos"><small>▦</small>Todos os módulos</a><a href="#/nivelamento"><small>?</small>Teste de nivelamento</a><a href="#/livros"><small>PDF</small>Meus livros (PDF)</a></div>`;
+function buildMenus(){if(document.body.classList.contains('has-rail'))renderRail();}
+
+/* ---------- trilho lateral direito ---------- */
+const DAILY_GOAL=30;
+function renderRail(){
+  const r=$('#rail');if(!r)return;
+  const today=S.gam.days[dayKey()]||0,gp=Math.min(100,Math.round(today/DAILY_GOAL*100));
+  const rec=S.place?byLv[S.place.level]:null;
+  r.innerHTML=`
+  <section class="rcard"><h3>Meta diária</h3><div class="goal"><span class="goal-ico">${gp>=100?mascotSVG('#FF9600','wow'):`<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#FFC800"/></svg>`}</span><div class="goal-txt"><b>${gp>=100?'Meta cumprida!':'Ganhe '+DAILY_GOAL+' XP hoje'}</b><div class="pbar"><i style="width:${gp}%;--bc:var(--orange)"></i></div><span class="pbar-n">${today} / ${DAILY_GOAL} XP</span></div></div></section>
+  <section class="rcard"><h3>Seus níveis <a href="#/progresso">Ver tudo</a></h3>${LVS.map(L=>{const p=pct(lvUnitsDone(L),L.units.length);return `<a class="rlv" href="#/nivel/${L.id}" style="${lvStyle(L)}"><span class="rlv-dot">${L.code}</span><span class="rlv-txt">${esc(L.name)} · ${L.cefr}<div class="pbar"><i style="width:${p}%;--bc:${L.color}"></i></div></span><span class="rlv-n">${p}%</span></a>`;}).join('')}</section>
+  <section class="rcard">${rec?`<h3>Nivelamento</h3><p>Seu teste indicou o nível <b>${esc(rec.name)}</b> (${rec.cefr}), com ${S.place.score}% de acertos.</p><a class="btn" href="#/nivelamento" style="width:100%">Refazer o teste</a>`:`<h3>Não sabe por onde começar?</h3><p>Faça o teste de nivelamento: 18 questões e a plataforma indica o seu nível.</p><a class="btn blue" href="#/nivelamento" style="width:100%">Fazer o teste</a>`}</section>
+  <p class="rfoot">${totalDone()} de ${totalUnits()} unidades estudadas · ${Object.keys(S.m).filter(k=>S.m[k]).length} de ${ALLMODS.length} módulos</p>`;
 }
 
 /* ---------- componentes ---------- */
@@ -212,7 +259,11 @@ function nextModule(){
 /* ---------- roteamento ---------- */
 function route(){
   const h=decodeURIComponent(location.hash.replace(/^#\/?/,''))||'inicio';const p=h.split('/');
-  $('#modmenu').open=false;
+  const nav=p[0]==='modulo'||p[0]==='nivel'?'inicio':p[0];
+  $$('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.nav===nav||(!['modulos','nivelamento','busca','progresso','livros','inicio'].includes(nav)&&a.dataset.nav==='inicio')));
+  const rail=['inicio','modulos'].includes(p[0])||!['modulo','nivel','nivelamento','busca','progresso','livros'].includes(p[0]);
+  document.body.classList.toggle('has-rail',rail);
+  closeModal();
   if(p[0]==='nivel'&&byLv[p[1]])renderLevel(byLv[p[1]]);
   else if(p[0]==='modulo'&&byLv[p[1]]&&byLv[p[1]].mods[+p[2]])renderMod(byLv[p[1]].mods[+p[2]]);
   else if(p[0]==='modulos')renderModules(p[1]);
@@ -221,6 +272,7 @@ function route(){
   else if(p[0]==='progresso')renderProg();
   else if(p[0]==='livros')renderBooks();
   else renderHome();
+  if(rail)renderRail();
   window.scrollTo(0,0);
 }
 window.addEventListener('hashchange',route);
@@ -228,29 +280,26 @@ window.addEventListener('hashchange',route);
 /* ---------- inicio ---------- */
 function renderHome(){
   document.title='Inglês em Formação';
-  const nm=nextModule(),td=totalDone(),tu=totalUnits();
-  const started=td>0||Object.keys(S.m).length>0;
-  const rec=S.place?byLv[S.place.level]:null;
-  const curLv=nm.lv;
-  V.innerHTML=`
-  <section class="sheet homehero"><div class="hero"><div class="acell ac"><small>EN</small>A→C</div><div>
-    <h1>Inglês do zero ao <span class="accent">avançado</span></h1>
-    <p class="lede">Três níveis, três livros e ${tu} unidades em ordem de dificuldade. Cada módulo tem explicação em português, exemplos com áudio, exercícios corrigidos na hora, quiz e flashcards. As unidades apontam para a página exata do livro.</p>
-    <div class="acts">
-      <a class="btn primary" href="#/modulo/${nm.lv.id}/${nm.i}">${started?'Continuar':'Começar'}: ${esc(nm.code)} · ${esc(nm.t)} →</a>
-      <a class="btn" href="#/nivelamento">${S.place?'Refazer':'Fazer'} teste de nivelamento</a>
-    </div>
-    ${rec?`<p class="sub" style="margin-top:.9rem">Seu nivelamento indicou: <strong>${esc(rec.name)}</strong> <span class="diff-mark d${rec.d}">${rec.cefr}</span></p>`:''}
-  </div></div></section>
-
-  <h2 class="sec"><span class="hn2">01</span><span>Sua trilha</span></h2>
-  <div class="metro">${LVS.map((L,i)=>{const p=pct(lvUnitsDone(L),L.units.length);const cls=p===100?'done':(L===curLv?'cur':'');
-    return `<div class="stop ${cls}"><span class="node">${p===100?'✓':i+1}</span><div class="stop-body"><div>
-      <div class="stop-name">${esc(L.name)} <span class="diff-mark d${L.d}">${L.cefr}</span></div>
-      <div class="stop-meta">${esc(L.book)} · ${esc(L.author)} · ${L.mods.length} módulos · ${L.units.length} unidades</div>
-    </div><div class="stop-r"><span class="pill">${p}%</span><a class="go" href="#/nivel/${L.id}">Abrir →</a></div></div></div>`;}).join('')}
-  </div>
-  <p style="margin-top:1.4rem"><a class="btn" href="#/modulos">Ver todos os ${ALLMODS.length} módulos →</a></p>`;
+  const nm=nextModule();
+  const started=totalDone()>0||Object.keys(S.m).length>0;
+  const X=[0,52,80,52,0,-52,-80,-52];
+  V.innerHTML=LVS.map((L,li)=>{
+    let k=0;
+    const nodes=L.mods.map(m=>{
+      const p=modPct(m),done=modDone(m)||p===100,cur=m===nm;
+      const cls=cur?'cur':(done?'done':'');
+      const x=X[(k++)%X.length];
+      return `<div class="pwrap${cur?' is-cur':''}" style="--x:${x}px">
+        <span class="pnode-h">${cur?`<span class="pbubble">${started?'Continuar':'Começar'}</span><span class="pring" style="--p:${Math.max(p,4)}"></span>`:''}<a class="pnode ${cls}" href="#/modulo/${L.id}/${m.i}" aria-label="${esc(m.code+' · '+m.t)}${done?' (concluído)':cur?' (atual)':''}">${done&&!cur?ICO.check:ICO.star}</a></span>
+        <span class="plabel"><b>${m.code}</b>${esc(m.t)}</span></div>`;
+    }).join('');
+    const lvDone=L.mods.every(m=>modDone(m)||modPct(m)===100);
+    const trophy=`<div class="pwrap" style="--x:${X[k%X.length]}px"><a class="pnode trophy${lvDone?' done':''}" href="#/nivel/${L.id}" aria-label="Visão geral do nível ${esc(L.name)}">${ICO.trophy}</a><span class="plabel"><b>Fim do nível</b>${esc(L.name)} ${L.cefr}</span></div>`;
+    const mas=[`<span class="path-mascot ${li%2?'l':'r'}" style="--my:150px">${mascotSVG(L.color,li===2?'wow':'')}</span>`,`<span class="path-mascot ${li%2?'r':'l'}" style="--my:${Math.round(L.mods.length*0.55)*130}px">${mascotSVG(L.color)}</span>`].join('');
+    return `<section style="${lvStyle(L)}">
+      <header class="lv-banner"><div><small>Nível ${li+1} · ${L.cefr}</small><h2>${esc(L.name)}</h2><p>${esc(L.book)} · ${esc(L.author)}</p></div><a class="lv-guide" href="#/nivel/${L.id}">${ICO.guide}<span>Guia</span></a></header>
+      <div class="path">${mas}${nodes}${trophy}</div></section>`;
+  }).join('')+`<p class="path-end"><a class="btn" href="#/modulos">Ver todos os ${ALLMODS.length} módulos</a></p>`;
 }
 
 /* ---------- modulos ---------- */
@@ -259,9 +308,9 @@ function renderModules(f){
   const sel=byLv[f]?[byLv[f]]:LVS;
   V.innerHTML=`<p class="crumb"><a href="#/inicio">início</a> / módulos</p><h1>Módulos</h1>
   <p class="sub">Todos os ${ALLMODS.length} módulos da trilha, em ordem de dificuldade. Cada um cobre um grupo de unidades do livro do nível.</p>
-  <div class="filters" role="group" aria-label="Filtrar por nível"><a class="btn${!byLv[f]?' primary':''}" href="#/modulos">Todos</a>${LVS.map(L=>`<a class="btn${f===L.id?' primary':''}" href="#/modulos/${L.id}"><span class="diff-mark d${L.d}">${L.cefr}</span>${esc(L.name)}</a>`).join('')}</div>
+  <div class="filters" role="group" aria-label="Filtrar por nível"><a class="btn${!byLv[f]?' sel':''}" href="#/modulos">Todos</a>${LVS.map(L=>`<a class="btn${f===L.id?' sel':''}" href="#/modulos/${L.id}"><span class="diff-mark d${L.d}">${L.cefr}</span>${esc(L.name)}</a>`).join('')}</div>
   ${sel.map(L=>{const done=L.mods.filter(modDone).length;return `<div class="home-sec"><span class="diff-mark d${L.d}">${L.name}</span>${esc(L.book)}<span style="margin-left:auto;font-family:var(--f-mono);font-size:.78rem;font-weight:400;color:var(--muted)">${done}/${L.mods.length} concluídos</span></div>
-    <div class="modgrid">${L.mods.map(m=>{const p=modPct(m);return `<a class="modp" href="#/modulo/${L.id}/${m.i}"><div class="modp-head"><span class="modp-badge" style="background:${L.color}">${m.code}</span><span class="modp-name">${esc(m.t)}</span><span class="modp-pct">${modDone(m)?'✓':p+'%'}</span></div>${barH(modDone(m)?100:p,L.color)}<div class="modp-meta">Unidades ${m.u[0]}–${m.u[1]}</div></a>`;}).join('')}</div>`;}).join('')}
+    <div class="modgrid">${L.mods.map(m=>{const p=modPct(m);return `<a class="modp" style="${lvStyle(L)}" href="#/modulo/${L.id}/${m.i}"><div class="modp-head"><span class="modp-badge" style="background:${L.color}">${m.code}</span><span class="modp-name">${esc(m.t)}</span><span class="modp-pct">${modDone(m)?'✓':p+'%'}</span></div>${barH(modDone(m)?100:p,L.color)}<div class="modp-meta">Unidades ${m.u[0]}–${m.u[1]}</div></a>`;}).join('')}</div>`;}).join('')}
 
   <div class="call k-dica" style="margin-top:2.4rem"><div class="lab">Como estudar</div>
     <ul><li>Comece pelo <a href="#/nivelamento">teste de nivelamento</a> se não souber por qual nível começar.</li>
@@ -281,7 +330,7 @@ function renderLevel(L){
     <div class="acts"><button class="btn" type="button" data-pdf="${L.id}">${ICO.book}Abrir livro (PDF)</button><a class="btn primary" href="#/modulo/${L.id}/${(L.mods.find(m=>!modDone(m))||L.mods[0]).i}">Continuar neste nível →</a></div>
   </div></div>${ring(p,L.color)}</div></section>
   <h2 class="sec"><span class="hn2">${L.code}</span><span>Módulos</span></h2>
-  <div class="lesson-list">${L.mods.map(m=>{const mp=modPct(m);return `<a class="lesson${modDone(m)?' done':''}" href="#/modulo/${L.id}/${m.i}"><span class="lchk"></span><span class="lnum">${m.code}</span><span class="ltitle">${esc(m.t)}<small>Unidades ${m.u[0]}–${m.u[1]} · ${modUnitsDone(m)}/${m.units.length} estudadas${S.qz[m.key]!=null?' · quiz '+S.qz[m.key]+'%':''}</small></span><span class="lbar">${barH(mp,L.color)}</span></a>`;}).join('')}</div>`;
+  <div class="lesson-list">${L.mods.map(m=>{const mp=modPct(m);return `<a class="lesson${modDone(m)?' done':''}" style="${lvStyle(L)}" href="#/modulo/${L.id}/${m.i}"><span class="lchk"></span><span class="lnum">${m.code}</span><span class="ltitle">${esc(m.t)}<small>Unidades ${m.u[0]}–${m.u[1]} · ${modUnitsDone(m)}/${m.units.length} estudadas${S.qz[m.key]!=null?' · quiz '+S.qz[m.key]+'%':''}</small></span><span class="lbar">${barH(mp,L.color)}</span></a>`;}).join('')}</div>`;
   bindPdf();
 }
 function bindPdf(){$$('[data-pdf]').forEach(b=>b.onclick=()=>openPdf(b.dataset.pdf,b.dataset.unit?+b.dataset.unit:0));}
@@ -303,13 +352,13 @@ function renderMod(m){
       <button class="stbtn ghost" type="button" id="bcards">${ICO.cards}Flashcards (${m.cards.length})</button>
       <button class="stbtn ghost" type="button" data-pdf="${L.id}" data-unit="${m.u[0]}">${ICO.book}Abrir no livro</button>
     </div>
-    <div class="call k-obj"><div class="lab">Neste módulo</div><p>${m.intro}</p></div>
+    <div class="call k-obj"><span class="mascot bob">${mascotSVG(L.color)}</span><div class="lab">Neste módulo</div><p>${m.intro}</p></div>
 
     <h2 class="sec"><span class="hn2">01</span><span>Explicação</span></h2>
     ${m.pts.map((p,i)=>`<div class="pt-card"><h3><span class="hn2">${String(i+1).padStart(2,'0')}</span>${p[0]}</h3>${p[1]}</div>`).join('')}
 
     <h2 class="sec"><span class="hn2">02</span><span>Exemplos</span></h2>
-    <div class="tw"><table><thead><tr><th>Inglês</th><th>Português</th></tr></thead><tbody>${m.ex.map(e=>`<tr><td class="en">${sayBtn(e[0])}${e[0]}</td><td class="pt">${e[1]}</td></tr>`).join('')}</tbody></table></div>
+    <div class="tw"><table><thead><tr><th>Inglês</th><th>Português</th></tr></thead><tbody>${m.ex.map(e=>`<tr><td class="en"><div class="en-row">${sayBtn(e[0])}<span>${e[0]}</span></div></td><td class="pt">${e[1]}</td></tr>`).join('')}</tbody></table></div>
     ${m.trap&&m.trap.length?`<div class="call k-atencao"><div class="lab">Erros comuns</div><ul>${m.trap.map(t=>`<li>${t}</li>`).join('')}</ul></div>`:''}
 
     <h2 class="sec"><span class="hn2">03</span><span>Pratique</span></h2>
@@ -336,12 +385,12 @@ function renderMod(m){
   $('#bquiz').onclick=()=>openQuiz(m.code+' · '+m.t,m.quiz.map(q=>({q:q[0],o:q[1],a:q[2],e:q[3]})),sc=>{const old=S.qz[m.key];if(old==null||sc>old)S.qz[m.key]=sc;addXP(Math.round(sc/10)+5,'quiz concluído');});
   $('#bcards').onclick=()=>openCards(m.code+' · '+m.t,m.cards);
   $$('.unit input').forEach(c=>c.onchange=()=>{const k=c.dataset.u;if(c.checked){S.u[k]=Date.now();addXP(10,'unidade estudada');}else{delete S.u[k];save();}c.closest('.unit').classList.toggle('done',c.checked);buildMenus();});
-  $('#mdone').onchange=e=>{if(e.target.checked){S.m[m.key]=Date.now();addXP(30,'módulo concluído');}else{delete S.m[m.key];save();}buildMenus();};
+  $('#mdone').onchange=e=>{if(e.target.checked){S.m[m.key]=Date.now();addXP(30,'módulo concluído');tone('win');confetti();}else{delete S.m[m.key];save();}buildMenus();};
   let nt;$('#notes').oninput=e=>{S.notes[m.key]=e.target.value;clearTimeout(nt);nt=setTimeout(()=>{save();$('#nsaved').textContent='Salvo '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});},400);};
   const norm=s=>String(s).toLowerCase().replace(/[’‘`´]/g,"'").replace(/\s+/g,' ').replace(/[.!?]+$/,'').trim();
   $$('#drill input').forEach(inp=>{inp.oninput=()=>{const li=inp.closest('.dr');S.da[li.dataset.id]=inp.value;li.classList.remove('bad');save();};inp.onkeydown=e=>{if(e.key==='Enter')$('#dcheck').click();};});
   $('#dcheck').onclick=()=>{let ok=0,gain=0;const items=$$('#drill .dr');items.forEach(li=>{const v=norm(li.querySelector('input').value);const ans=li.dataset.a.split('|').map(norm);const good=v&&ans.includes(v);li.classList.toggle('ok',good);li.classList.toggle('bad',!good);li.querySelector('.drfb').textContent=good?'✓':(v?'✗':'');if(good){ok++;if(!S.dr[li.dataset.id]){S.dr[li.dataset.id]=1;gain+=2;}}});
-    $('#dscore').textContent=ok+'/'+items.length+' corretas';if(gain)addXP(gain,'exercícios');else save();};
+    $('#dscore').textContent=ok+'/'+items.length+' corretas';tone(ok===items.length?'win':ok?'ok':'bad');if(ok===items.length)confetti();if(gain)addXP(gain,'exercícios');else save();};
   $('#dshow').onclick=()=>$$('#drill .dr').forEach(li=>{if(!li.classList.contains('ok'))li.querySelector('.drfb').textContent='→ '+li.dataset.a.split('|')[0];});
   $('#dclear').onclick=()=>$$('#drill .dr').forEach(li=>{li.querySelector('input').value='';delete S.da[li.dataset.id];li.classList.remove('ok','bad');li.querySelector('.drfb').textContent='';save();});
 }
@@ -389,14 +438,20 @@ function openQuiz(title,qs,onDone,opts={}){
     $$('.qz-opt',box).forEach(b=>b.onclick=()=>{
       const k=+b.dataset.k,good=k===q.a;if(good)score++;res.push(good);
       $$('.qz-opt',box).forEach(x=>{x.disabled=true;const kk=+x.dataset.k;if(kk===q.a)x.classList.add('ok');else if(kk===k)x.classList.add('bad');});
-      $('.qz-after',box).innerHTML=(q.e?`<div class="qz-exp">${good?'<strong>Correto!</strong> ':'<strong>Não foi dessa vez.</strong> '}${q.e}</div>`:'')+`<div style="display:flex;justify-content:flex-end;margin-top:1rem"><button class="btn primary" type="button" id="qznext">${i<qs.length-1?'Próxima →':'Ver resultado'}</button></div>`;
+      tone(good?'ok':'bad');
+      const PRAISE=['Muito bem!','Excelente!','Isso aí!','Mandou bem!','Perfeito!'];
+      $('.qz-after',box).innerHTML=`<div class="qz-fb ${good?'ok':'bad'}"><span class="qz-fb-ico">${good?ICO.ok:ICO.x}</span><div class="qz-fb-txt"><b>${good?PRAISE[Math.floor(Math.random()*PRAISE.length)]:'Resposta correta:'}</b>${good?'':`<span style="display:block;font-weight:900">${q.o[q.a]}</span>`}${q.e?`<span>${q.e}</span>`:''}</div><button class="btn primary" type="button" id="qznext">${i<qs.length-1?'Continuar':'Ver resultado'}</button></div>`;
       $('#qznext').onclick=()=>{i++;i<qs.length?show():end();};$('#qznext').focus();
+      $('.qz-fb',box).scrollIntoView({block:'nearest',behavior:'smooth'});
     });
   }
   function end(){
-    const p=pct(score,qs.length);const col=p>=70?'var(--good)':p>=50?'var(--orange)':'var(--bad)';
+    const p=pct(score,qs.length);
     const extra=opts.result?opts.result(res,p):'';
-    box.innerHTML=`<div class="qz-result"><div class="qz-rscore" style="--p:${p};--c:${col}"><i>${p}%</i></div><b>${score} de ${qs.length} corretas</b><span>${extra||(p>=80?'Excelente! Você domina este conteúdo.':p>=60?'Bom resultado. Revise os pontos que errou e tente de novo.':'Vale reler a explicação e as unidades do livro antes de tentar outra vez.')}</span><div class="acts qz-ractions"><button class="btn" type="button" id="qzagain">Refazer</button><button class="btn primary" type="button" id="qzclose">Fechar</button></div></div>`;
+    if(p>=80){tone('win');confetti();}
+    box.innerHTML=`<div class="qz-result"><span class="mascot bob">${mascotSVG(p>=60?'#58CC02':'#FF9600',p>=80?'wow':p>=50?'':'sad')}</span><b>${p>=80?'Lição dominada!':p>=50?'Bom trabalho!':'Continue praticando!'}</b>
+      <div class="qz-boxes"><div class="qz-box" style="--bx:var(--green)"><small>Acertos</small><b>${score}/${qs.length}</b></div><div class="qz-box" style="--bx:${p>=70?'var(--blue)':'var(--orange)'}"><small>Precisão</small><b>${p}%</b></div></div>
+      <span>${extra||(p>=80?'Você domina este conteúdo.':p>=50?'Revise os pontos que errou e tente de novo.':'Vale reler a explicação e as unidades do livro antes de tentar outra vez.')}</span><div class="acts qz-ractions"><button class="btn" type="button" id="qzagain">Refazer</button><button class="btn primary" type="button" id="qzclose">Continuar</button></div></div>`;
     $('#qzagain').onclick=()=>{i=0;score=0;res.length=0;show();};$('#qzclose').onclick=closeModal;
     if(onDone)onDone(p,res);
   }

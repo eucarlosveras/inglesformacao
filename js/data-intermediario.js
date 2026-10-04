@@ -1,6 +1,6 @@
 window.LV=window.LV||[];
 LV.push({
-id:'intermediario',name:'Intermediário',code:'IT',cefr:'B1–B2',d:2,color:'#d97706',
+id:'intermediario',name:'Intermediário',code:'IT',cefr:'B1–B2',d:2,color:'#1CB0F6',dark:'#1899D6',
 book:'English Grammar in Use',author:'Raymond Murphy',ed:'4ª edição',
 file:'English Grammar in Use - Raymond Murphy - Intermediario.pdf',pdf0:11,
 desc:'O livro mais usado do mundo para gramática intermediária. Aprofunda os tempos verbais, modais, condicionais, passiva, discurso indireto, -ing × to, artigos, orações relativas, preposições e phrasal verbs.',

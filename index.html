@@ -5,31 +5,45 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Inglês em Formação</title>
 <meta name="description" content="Plataforma de estudos de inglês em três níveis — Inicial, Intermediário e Avançado — guiada pelos livros Grammar in Use.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230B7285'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-size='13' fill='white' text-anchor='middle'%3EEN%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#58CC02">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M60 8c28 0 50 19 50 44s-22 44-50 44c-6 0-12-1-17-3L18 108l7-22C14 78 10 66 10 52 10 27 32 8 60 8z' fill='%2358CC02'/%3E%3Cellipse cx='44' cy='48' rx='13' ry='15' fill='%23fff'/%3E%3Cellipse cx='76' cy='48' rx='13' ry='15' fill='%23fff'/%3E%3Ccircle cx='47' cy='51' r='7' fill='%23333'/%3E%3Ccircle cx='79' cy='51' r='7' fill='%23333'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,500;0,600;0,700;0,800;0,900;1,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <a class="skip" href="#main">Pular para o conteúdo</a>
-<header class="top" role="banner">
-  <div class="ribbon">
-    <a class="brand" href="#/inicio"><span class="logo" aria-hidden="true">EN</span><span class="bt">Inglês em Formação<small>trilha Grammar in Use · v1.0</small></span></a>
-    <a class="btn hide-focus" id="homebtn" href="#/inicio" aria-label="Início"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11 12 4l8 7M6 9.5V20h12V9.5"/></svg><span class="lbl">Início</span></a>
-    <details class="menu" id="modmenu"><summary aria-label="Abrir índice de níveis e módulos">Níveis ▾</summary><div class="menupanel" id="menupanel"></div></details>
-    <a class="btn hide-focus" href="#/modulos" aria-label="Módulos"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="lbl">Módulos</span></a>
-    <a class="btn hide-focus" href="#/busca" aria-label="Buscar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><span class="lbl">Buscar</span></a>
-    <a class="btn hide-focus" href="#/progresso" aria-label="Meu progresso"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="lbl">Progresso</span></a>
-    <button class="gam-chip" id="gamchip" type="button" title="Ofensiva, XP e nível" aria-label="Abrir ofensiva e XP"><svg class="gc-fire" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1.2 3.4-1 4.6-1 6.8a3 3 0 0 0 5.8.9c1.6 2 2.2 3.7 2.2 5.6A7 7 0 1 1 6.2 12c1.2 1.2 2.4 1.1 3 0 .9-1.7-.7-3.3.4-5C10.8 5.6 12 4.2 12 2z"/></svg><span class="gc-n" id="gcstreak">0</span><span class="gc-sep"></span><span class="gc-lv" id="gclv">Nv 1</span></button>
-    <button class="btn ico" id="fontbtn" title="Tamanho da fonte" aria-label="Tamanho da fonte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19 8.5 5h1L15 19M5 14h7M17 10h5M19.5 7.5v5"/></svg></button>
-    <button class="btn ico" id="focusbtn" aria-pressed="false" title="Modo foco" aria-label="Modo foco"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><circle cx="12" cy="12" r="2.5"/></svg></button>
-    <button class="btn ico" id="themebtn" aria-pressed="false" title="Modo noturno" aria-label="Modo noturno"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
+<aside class="side" aria-label="Navegação principal">
+  <a class="logo" href="#/inicio" aria-label="Inglês em Formação — início"><span class="logo-mark" id="logomark"></span><span class="logo-word">inglês<b>em formação</b></span></a>
+  <nav class="nav">
+    <a href="#/inicio" data-nav="inicio"><span class="ni ni-learn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 9.8V20h13V9.8"/><path d="M10 20v-5.5h4V20"/></svg></span><span class="nl">Aprender</span></a>
+    <a href="#/modulos" data-nav="modulos"><span class="ni ni-mods"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></svg></span><span class="nl">Módulos</span></a>
+    <a href="#/nivelamento" data-nav="nivelamento"><span class="ni ni-place"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V14M10 20V9M16 20V4M22 20H2"/></svg></span><span class="nl">Nivelamento</span></a>
+    <a href="#/busca" data-nav="busca"><span class="ni ni-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></span><span class="nl">Buscar</span></a>
+    <a href="#/progresso" data-nav="progresso"><span class="ni ni-prog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg></span><span class="nl">Progresso</span></a>
+    <a href="#/livros" data-nav="livros"><span class="ni ni-books"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/></svg></span><span class="nl">Livros</span></a>
+  </nav>
+</aside>
+<div class="shell">
+  <header class="topbar" role="banner">
+    <a class="logo logo-mobile" href="#/inicio" aria-label="Início"><span class="logo-mark" id="logomark2"></span></a>
+    <div class="chips">
+      <button class="chip chip-fire" id="gamchip" type="button" title="Ofensiva" aria-label="Ofensiva: abrir detalhes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1.2 3.4-1 4.6-1 6.8a3 3 0 0 0 5.8.9c1.6 2 2.2 3.7 2.2 5.6A7 7 0 1 1 6.2 12c1.2 1.2 2.4 1.1 3 0 .9-1.7-.7-3.3.4-5C10.8 5.6 12 4.2 12 2z"/></svg><span id="gcstreak">0</span></button>
+      <button class="chip chip-xp" id="xpchip" type="button" title="XP total" aria-label="XP: abrir detalhes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span id="gcxp">0</span></button>
+      <button class="chip chip-lv" id="lvchip" type="button" title="Nível de XP" aria-label="Nível: abrir detalhes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17l-5.9 3 1.2-6.5L2.5 8.9 9.1 8z"/></svg><span id="gclv">1</span></button>
+    </div>
+    <div class="tools">
+      <button class="tbtn" id="soundbtn" aria-pressed="true" title="Sons" aria-label="Sons"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="snd-on" d="M16.5 8.5a5 5 0 0 1 0 7"/><path class="snd-off" d="m17 9 5 6m0-6-5 6"/></svg></button>
+      <button class="tbtn" id="fontbtn" title="Tamanho da fonte" aria-label="Tamanho da fonte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19 8.5 5h1L15 19M5 14h7M17 10h5M19.5 7.5v5"/></svg></button>
+      <button class="tbtn" id="focusbtn" aria-pressed="false" title="Modo foco" aria-label="Modo foco"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><circle cx="12" cy="12" r="2.5"/></svg></button>
+      <button class="tbtn" id="themebtn" aria-pressed="false" title="Modo noturno" aria-label="Modo noturno"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button>
+    </div>
+  </header>
+  <div class="content">
+    <main id="main" tabindex="-1"><div class="col" id="view"></div></main>
+    <aside class="rail" id="rail" aria-label="Resumo"></aside>
   </div>
-  <div class="progtop" aria-hidden="true"><i id="progtop"></i></div>
-</header>
-<div class="wrap">
-  <main id="main" tabindex="-1"><div class="col" id="view"></div></main>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" async></script>

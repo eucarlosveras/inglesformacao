@@ -442,6 +442,21 @@ mark.q{background:var(--yellow);color:#3C3C3C;border-radius:4px;padding:0 .1em}
 .gm-day.today{border-color:var(--blue-line);box-shadow:0 0 0 2px var(--blue-line)}
 .gm-legend{font-size:.82rem;color:var(--muted);font-weight:700;line-height:1.55}
 
+.linkbtn{border:0;background:none;padding:0;color:var(--blue-t);font-weight:900;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase}
+.linkbtn:hover{color:var(--blue)}
+.goal-pick{display:flex;align-items:center;gap:1rem;margin-bottom:1.1rem}
+.goal-pick .mascot{width:76px;height:76px;flex:none}
+.goal-opts{display:flex;flex-direction:column;gap:.65rem}
+.goal-opt{display:flex;align-items:center;gap:.8rem;width:100%;text-align:left;padding:.9rem 1.1rem;border:2px solid var(--line);border-bottom-width:4px;border-radius:var(--rad);background:var(--panel);color:var(--strong)}
+.goal-opt:hover{background:var(--soft)}
+.goal-opt:active{transform:translateY(2px);border-bottom-width:2px}
+.goal-opt.on{background:var(--blue-l);border-color:var(--blue-line);color:var(--blue-t)}
+.goal-n{font-weight:900;font-size:1.05rem;min-width:5.5rem}
+.goal-d{flex:1;color:var(--muted);font-weight:700;font-size:.9rem}
+.goal-opt.on .goal-d{color:var(--blue-t)}
+.goal-x{font-weight:900}
+@media (max-width:480px){.goal-d{display:none}}
+
 /* confete */
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:450;overflow:hidden}
 .confetti i{position:absolute;top:-20px;width:10px;height:16px;border-radius:3px;animation:fall linear forwards}

@@ -168,7 +168,21 @@ const bookPages=n=>(2*n)+'–'+(2*n+1);
 
 /* ---------- gamificacao ---------- */
 const dayKey=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-function addXP(n,msg){S.gam.xp=(S.gam.xp||0)+n;const k=dayKey();S.gam.days[k]=(S.gam.days[k]||0)+n;save();if(msg)toast('+'+n+' XP · '+msg);}
+function addXP(n,msg){
+  S.gam.xp=(S.gam.xp||0)+n;const k=dayKey(),before=S.gam.days[k]||0;S.gam.days[k]=before+n;save();
+  if(before<goalXP()&&before+n>=goalXP()){toast('🎉 Meta diária cumprida! +'+n+' XP');setTimeout(()=>{tone('win');confetti();},150);}
+  else if(msg)toast('+'+n+' XP · '+msg);
+}
+/* meta diária */
+const GOALS=[{xp:10,n:'Leve',d:'cerca de 5 min por dia'},{xp:20,n:'Regular',d:'cerca de 10 min por dia'},{xp:30,n:'Puxada',d:'cerca de 15 min por dia'},{xp:50,n:'Intensa',d:'cerca de 25 min por dia'}];
+const goalXP=()=>S.goal||30;
+const goalName=()=>(GOALS.find(g=>g.xp===goalXP())||GOALS[2]).n;
+function openGoal(){
+  const w=modal('Meta diária','Escolha sua meta diária',`<div class="goal-pick"><span class="mascot bob">${mascotSVG('#FF9600')}</span><p class="sub" style="margin:0">Quanto XP você quer ganhar por dia? Dá para mudar quando quiser. Cumprir a meta mantém o ritmo; estudar qualquer coisa já conta para a ofensiva.</p></div>
+    <div class="goal-opts">${GOALS.map(g=>`<button type="button" class="goal-opt${g.xp===goalXP()?' on':''}" data-goal="${g.xp}"><span class="goal-n">${g.n}</span><span class="goal-d">${g.d}</span><span class="goal-x">${g.xp} XP</span></button>`).join('')}</div>`);
+  $$('.goal-opt',w).forEach(b=>b.onclick=()=>{S.goal=+b.dataset.goal;save();closeModal();updTop();toast('Meta diária: '+goalName()+' · '+S.goal+' XP por dia');});
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-goal-edit]');if(b){e.preventDefault();openGoal();}});
 function streak(){
   let d=new Date(),n=0;
   if(!S.gam.days[dayKey(d)])d.setDate(d.getDate()-1);
@@ -225,13 +239,12 @@ function updTop(){
 function buildMenus(){if(document.body.classList.contains('has-rail'))renderRail();}
 
 /* ---------- trilho lateral direito ---------- */
-const DAILY_GOAL=30;
 function renderRail(){
   const r=$('#rail');if(!r)return;
-  const today=S.gam.days[dayKey()]||0,gp=Math.min(100,Math.round(today/DAILY_GOAL*100));
+  const DAILY_GOAL=goalXP(),today=S.gam.days[dayKey()]||0,gp=Math.min(100,Math.round(today/DAILY_GOAL*100));
   const rec=S.place?byLv[S.place.level]:null;
   r.innerHTML=`
-  <section class="rcard"><h3>Meta diária</h3><div class="goal"><span class="goal-ico">${gp>=100?mascotSVG('#FF9600','wow'):`<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#FFC800"/></svg>`}</span><div class="goal-txt"><b>${gp>=100?'Meta cumprida!':'Ganhe '+DAILY_GOAL+' XP hoje'}</b><div class="pbar"><i style="width:${gp}%;--bc:var(--orange)"></i></div><span class="pbar-n">${today} / ${DAILY_GOAL} XP</span></div></div></section>
+  <section class="rcard"><h3>Meta diária <button type="button" class="linkbtn" data-goal-edit>Editar</button></h3><div class="goal"><span class="goal-ico">${gp>=100?mascotSVG('#FF9600','wow'):`<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#FFC800"/></svg>`}</span><div class="goal-txt"><b>${gp>=100?'Meta cumprida!':'Ganhe '+DAILY_GOAL+' XP hoje'}</b><div class="pbar"><i style="width:${gp}%;--bc:var(--orange)"></i></div><span class="pbar-n">${today} / ${DAILY_GOAL} XP · meta ${goalName().toLowerCase()}</span></div></div></section>
   <section class="rcard"><h3>Seus níveis <a href="#/progresso">Ver tudo</a></h3>${LVS.map(L=>{const p=pct(lvUnitsDone(L),L.units.length);return `<a class="rlv" href="#/nivel/${L.id}" style="${lvStyle(L)}"><span class="rlv-dot">${L.code}</span><span class="rlv-txt">${esc(L.name)} · ${L.cefr}<div class="pbar"><i style="width:${p}%;--bc:${L.color}"></i></div></span><span class="rlv-n">${p}%</span></a>`;}).join('')}</section>
   <section class="rcard">${rec?`<h3>Nivelamento</h3><p>Seu teste indicou o nível <b>${esc(rec.name)}</b> (${rec.cefr}), com ${S.place.score}% de acertos.</p><a class="btn" href="#/nivelamento" style="width:100%">Refazer o teste</a>`:`<h3>Não sabe por onde começar?</h3><p>Faça o teste de nivelamento: 18 questões e a plataforma indica o seu nível.</p><a class="btn blue" href="#/nivelamento" style="width:100%">Fazer o teste</a>`}</section>
   <p class="rfoot">${totalDone()} de ${totalUnits()} unidades estudadas · ${Object.keys(S.m).filter(k=>S.m[k]).length} de ${ALLMODS.length} módulos</p>`;
@@ -465,6 +478,7 @@ function openGam(){
   for(let k=0;k<7;k++){const key=dayKey(d);days.push(`<div class="gm-day${S.gam.days[key]?' done':''}${k===6?' today':''}"><span class="gm-day-l">${d.toLocaleDateString('pt-BR',{weekday:'short'}).replace('.','')}</span><span>${S.gam.days[key]?'🔥':'·'}</span></div>`);d.setDate(d.getDate()+1);}
   modal('Progresso','Ofensiva e XP',`<div class="gm-hero"><div class="gm-flame${st?' on':''}">${ICO.fire}<span class="gm-flame-n">${st}</span></div><div><b>${st} dia${st===1?'':'s'} seguido${st===1?'':'s'}</b><span>${S.gam.days[dayKey()]?'Você já estudou hoje. Ofensiva garantida!':'Estude algo hoje para manter a ofensiva.'}</span></div></div>
   <div class="gm-level"><div class="gm-lv-top"><span class="gm-lv-badge">Nv ${lv}</span><div><b>${gLevelName(lv)}</b><span>${xp} XP no total · faltam ${XP_STEP-into} XP para o próximo nível</span></div></div><div class="gm-bar"><i style="width:${into/XP_STEP*100}%"></i></div></div>
+  <div class="gm-level"><div class="gm-lv-top"><span class="gm-lv-badge" style="background:var(--orange);box-shadow:0 3px 0 var(--orange-d)">${ICO.bolt.replace('<svg','<svg width="18" height="18" fill="#fff"')}</span><div><b>Meta diária: ${goalName()} · ${goalXP()} XP</b><span>Hoje: ${Math.min(S.gam.days[dayKey()]||0,9999)} XP${(S.gam.days[dayKey()]||0)>=goalXP()?' · cumprida! 🎉':''}</span></div><button type="button" class="btn" data-goal-edit style="margin-left:auto;min-height:40px">Alterar</button></div><div class="gm-bar"><i style="width:${Math.min(100,(S.gam.days[dayKey()]||0)/goalXP()*100)}%;background:var(--orange)"></i></div></div>
   <p class="gm-sub">Últimos 7 dias</p><div class="gm-week">${days.join('')}</div>
   <p class="gm-legend">Como ganhar XP: +2 por exercício acertado (primeira vez), +10 por unidade estudada, +5 a +15 por quiz, +5 por baralho de flashcards e +30 por módulo concluído.</p>`);
 }

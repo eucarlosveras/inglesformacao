@@ -6,7 +6,103 @@ let S={u:{},m:{},dr:{},da:{},qz:{},notes:{},theme:null,fs:17,focus:false,last:nu
 try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o)S=Object.assign(S,o);}catch(e){}
 S.gam=S.gam||{xp:0,days:{}};
 let saveT=null;
-function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}updTop();},200);}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function save(){S._ts=Date.now();clearTimeout(saveT);saveT=setTimeout(()=>{persist();updTop();sbQueuePush();},200);}
+
+/* ---------- Supabase (progresso na nuvem) ---------- */
+const SB_URL='https://undpiclnsmmlipxaxxti.supabase.co';
+const SB_KEY='sb_publishable_-R2FQRy2fxKseO_4mkvuhA_NuO4gUPG';
+const SB_TABLE='english_progress';
+let sb=null,sbUser=null,sbPushT=null,sbTries=0,sbBusy=false,sbLastSync=null;
+function sbInit(){
+  if(!window.supabase){if(++sbTries<40){setTimeout(sbInit,300);return;}console.warn('Supabase JS não carregou a tempo; usando apenas armazenamento local.');refreshAcct();return;}
+  sbInitReal();
+}
+async function sbInitReal(){
+  try{
+    sb=window.supabase.createClient(SB_URL,SB_KEY);
+    sb.auth.onAuthStateChange((event,session)=>{
+      const prev=sbUser&&sbUser.id;sbUser=session&&session.user;
+      if((event==='SIGNED_IN'&&sbUser&&sbUser.id!==prev)||event==='USER_UPDATED')setTimeout(sbPull,0);
+      setTimeout(refreshAcct,0);
+    });
+    let {data:{session}}=await sb.auth.getSession();
+    if(!session){const {data,error}=await sb.auth.signInAnonymously();if(error)throw error;session=data.session;}
+    sbUser=session&&session.user;
+    if(sbUser)await sbPull();
+  }catch(e){console.warn('Supabase indisponível; usando apenas armazenamento local.',e);}
+  refreshAcct();
+}
+/* junta dois estados sem perder progresso (usado quando o progresso local veio de outra conta/aparelho) */
+function mergeState(R){
+  ['u','m','dr'].forEach(k=>{S[k]=S[k]||{};Object.entries(R[k]||{}).forEach(([id,v])=>{if(!S[k][id])S[k][id]=v;});});
+  S.da=Object.assign({},R.da||{},S.da||{});
+  S.qz=S.qz||{};Object.entries(R.qz||{}).forEach(([k,v])=>{if(S.qz[k]==null||v>S.qz[k])S.qz[k]=v;});
+  S.notes=S.notes||{};Object.entries(R.notes||{}).forEach(([k,v])=>{if(!S.notes[k]||String(v).length>String(S.notes[k]).length)S.notes[k]=v;});
+  const rg=R.gam||{xp:0,days:{}};S.gam.xp=Math.max(S.gam.xp||0,rg.xp||0);
+  Object.entries(rg.days||{}).forEach(([d,v])=>{S.gam.days[d]=Math.max(S.gam.days[d]||0,v);});
+  if(R.place&&(!S.place||R.place.date>S.place.date))S.place=R.place;
+  if(!S.last)S.last=R.last||null;
+}
+async function sbPull(){
+  if(!sb||!sbUser)return;
+  if(sbBusy){setTimeout(sbPull,800);return;}
+  sbBusy=true;let changed=false;
+  try{
+    const {data,error}=await sb.from(SB_TABLE).select('state,updated_at').eq('user_id',sbUser.id).maybeSingle();
+    if(error)throw error;
+    const R=data&&data.state;
+    if(R&&Object.keys(R).length){
+      const before=JSON.stringify(S);
+      if(!S._uid||S._uid!==sbUser.id){mergeState(R);S._ts=Date.now();}
+      else if(new Date(data.updated_at).getTime()>(S._ts||0)){const keep={theme:S.theme,fs:S.fs,focus:S.focus};S=Object.assign({u:{},m:{},dr:{},da:{},qz:{},notes:{},gam:{xp:0,days:{}}},R,keep);S._ts=new Date(data.updated_at).getTime();}
+      changed=JSON.stringify(S)!==before;
+    }
+    S._uid=sbUser.id;persist();sbLastSync=Date.now();
+  }catch(e){console.warn('Falha ao buscar progresso no Supabase.',e);}
+  sbBusy=false;
+  if(changed){applyPrefs();buildMenus();updTop();const a=document.activeElement;if(!$('#smodal')&&!(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)))route();toast('Progresso sincronizado da nuvem');}
+  await sbPushNow();
+}
+function sbQueuePush(){if(!sb||!sbUser)return;clearTimeout(sbPushT);sbPushT=setTimeout(sbPushNow,1200);}
+async function sbPushNow(){
+  if(!sb||!sbUser)return;
+  if(sbBusy){sbQueuePush();return;}
+  sbBusy=true;
+  try{
+    S._uid=sbUser.id;
+    const {error}=await sb.from(SB_TABLE).upsert({user_id:sbUser.id,state:S,updated_at:new Date(S._ts||Date.now()).toISOString()});
+    if(error)throw error;
+    persist();sbLastSync=Date.now();
+  }catch(e){console.warn('Falha ao sincronizar progresso com Supabase.',e);}
+  sbBusy=false;refreshAcct();
+}
+function sbAccountStatusHTML(){
+  if(!sb)return '<p class="sub">Sincronização com a nuvem indisponível neste momento. Seu progresso continua salvo neste navegador.</p>';
+  if(!sbUser)return '<p class="sub">Conectando à nuvem…</p>';
+  const when=sbLastSync?' Última sincronização: '+new Date(sbLastSync).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'.':'';
+  if(sbUser.email&&!sbUser.is_anonymous)return `<p class="sub"><span class="okc">✓</span> Conectado como <strong>${esc(sbUser.email)}</strong>. Seu progresso sincroniza com qualquer aparelho em que você entrar com esse e-mail.${when}</p>`;
+  return `<p class="sub">Este aparelho usa uma conta anônima: o progresso fica salvo na nuvem, mas só este navegador acessa. Vincule um e-mail para usar em outros aparelhos sem perder nada do que já estudou.${when}</p>`;
+}
+function refreshAcct(){const b=$('#acctstatus');if(b)b.innerHTML=sbAccountStatusHTML();const f=$('#acctform');if(f)f.style.display=sbUser&&sbUser.email&&!sbUser.is_anonymous?'none':'';}
+async function sbLinkEmail(email){
+  const box=$('#acctmsg');if(!box)return;
+  if(!sb||!sbUser){box.textContent='Sincronização indisponível agora. Tente novamente mais tarde.';return;}
+  box.textContent='Enviando…';
+  const redirect=location.origin+location.pathname;
+  try{
+    if(sbUser.is_anonymous){
+      const {error}=await sb.auth.updateUser({email},{emailRedirectTo:redirect});
+      if(error){
+        if(/already|registrad|exist|taken|in use/i.test(error.message||'')){
+          const {error:e2}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:redirect}});
+          if(e2)throw e2;
+          box.textContent='Esse e-mail já tem conta. Enviamos um link de acesso para '+email+'. Abra-o neste aparelho para entrar: o progresso daqui será somado ao da sua conta.';
+        }else throw error;
+      }else box.textContent='Enviamos um link de confirmação para '+email+'. Abra-o para vincular este progresso ao seu e-mail.';
+    }else box.textContent='Este aparelho já está conectado a '+sbUser.email+'.';
+  }catch(e){box.textContent='Não foi possível enviar: '+(e&&e.message||'erro desconhecido');}
+}
 function toast(m){const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',2200);}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const strip=s=>String(s).replace(/<[^>]+>/g,'');
@@ -373,12 +469,19 @@ function renderProg(){
   </div>
   ${LVS.map(L=>`<h2 class="sec"><span class="diff-mark d${L.d}">${L.cefr}</span><span>${esc(L.name)}</span><span style="margin-left:auto;font-family:var(--f-mono);font-size:.8rem;color:var(--muted)">${lvUnitsDone(L)}/${L.units.length} unidades</span></h2>
     ${L.mods.map(m=>`<div class="modrow"><a href="#/modulo/${L.id}/${m.i}">${modDone(m)?'✓ ':''}${m.code} · ${esc(m.t)}${S.qz[m.key]!=null?` <span class="tag">quiz ${S.qz[m.key]}%</span>`:''}</a>${barH(modPct(m),L.color)}<span class="n">${modPct(m)}%</span></div>`).join('')}`).join('')}
+  <h2 class="sec"><span>Sincronização na nuvem</span></h2>
+  <div id="acctstatus">${sbAccountStatusHTML()}</div>
+  <form id="acctform" class="acts" style="margin-top:.4rem${sbUser&&sbUser.email&&!sbUser.is_anonymous?';display:none':''}"><input type="email" id="acctemail" required placeholder="seu@email.com" aria-label="E-mail" style="flex:1 1 240px;min-width:0"><button class="btn primary" type="submit">Vincular e-mail</button></form>
+  <p class="sub" id="acctmsg" role="status" style="margin-top:.6rem"></p>
+  <div class="acts"><button class="btn" type="button" id="bsync">Sincronizar agora</button></div>
   <h2 class="sec"><span>Backup</span></h2>
-  <p class="sub">Seu progresso fica salvo neste navegador. Exporte um arquivo para guardar ou levar para outro aparelho.</p>
+  <p class="sub">Exporte um arquivo para guardar uma cópia do seu progresso ou levá-lo para outro aparelho.</p>
   <div class="acts"><button class="btn" type="button" id="bexp">Exportar progresso</button><label class="btn filebtn">Importar progresso<input type="file" id="bimp" accept="application/json"></label><button class="btn danger" type="button" id="breset">Apagar tudo</button></div>`;
+  $('#acctform').onsubmit=e=>{e.preventDefault();sbLinkEmail($('#acctemail').value.trim());};
+  $('#bsync').onclick=async()=>{if(!sb||!sbUser){toast('Nuvem indisponível agora');return;}$('#acctmsg').textContent='Sincronizando…';await sbPull();$('#acctmsg').textContent='';toast('Sincronizado');};
   $('#bexp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='ingles-progresso-'+dayKey()+'.json';a.click();};
   $('#bimp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=JSON.parse(t);if(typeof o!=='object'||!o.u)throw 0;S=Object.assign(S,o);save();applyPrefs();buildMenus();route();toast('Progresso importado');}catch(err){toast('Arquivo inválido');}});};
-  $('#breset').onclick=()=>{if(confirm('Apagar todo o progresso, anotações e XP deste navegador?')){S={u:{},m:{},dr:{},da:{},qz:{},notes:{},theme:S.theme,fs:S.fs,focus:false,last:null,gam:{xp:0,days:{}},place:null};save();buildMenus();route();toast('Progresso apagado');}};
+  $('#breset').onclick=()=>{if(confirm('Apagar todo o progresso, anotações e XP deste navegador?')){S={u:{},m:{},dr:{},da:{},qz:{},notes:{},theme:S.theme,fs:S.fs,focus:false,last:null,gam:{xp:0,days:{}},place:null,_uid:S._uid};save();buildMenus();route();toast('Progresso apagado');}};
 }
 
 /* ---------- livros ---------- */
@@ -400,4 +503,5 @@ function renderBooks(){
 /* ---------- init ---------- */
 applyPrefs();buildMenus();updTop();route();
 loadPdfs();
+sbInit();
 if('speechSynthesis' in window)speechSynthesis.getVoices();

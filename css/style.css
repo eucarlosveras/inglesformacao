@@ -232,7 +232,7 @@ li::marker{color:var(--accent)}
 
 textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:8px;background:var(--soft);padding:.65rem .75rem;line-height:1.55;resize:vertical}
 textarea:focus{background:var(--panel);border-color:var(--accent);outline:0;box-shadow:0 0 0 3px var(--accent-soft)}
-input[type=text],input[type=search]{border:1px solid var(--line);border-radius:8px;background:var(--soft);padding:.4rem .7rem;min-height:40px}
+input[type=text],input[type=search],input[type=email]{border:1px solid var(--line);border-radius:8px;background:var(--soft);padding:.4rem .7rem;min-height:40px}
 .saved{font-size:.78rem;color:var(--muted)}
 
 .secchk{display:inline-flex;gap:.55rem;align-items:center;cursor:pointer;font-family:var(--f-head);font-size:.92rem;font-weight:600;color:var(--accent);border:1px solid var(--accent-line);border-radius:999px;padding:.45rem 1rem .45rem .6rem;background:var(--accent-dim);margin-top:1.4rem}

@@ -20,7 +20,16 @@ Plataforma de estudos de inglês em três níveis, do zero ao avançado, guiada 
 - Lista das unidades do livro, com página e botão que abre o PDF na página certa
 - Anotações pessoais
 
-Também tem teste de nivelamento, busca, painel de progresso, ofensiva diária, XP, modo noturno, modo foco e backup do progresso em arquivo. O progresso fica salvo no navegador (`localStorage`).
+Também tem teste de nivelamento, busca, painel de progresso, ofensiva diária, XP, modo noturno, modo foco e backup do progresso em arquivo.
+
+## Progresso na nuvem (Supabase)
+
+O progresso fica salvo no navegador (`localStorage`) e é sincronizado com o Supabase (projeto `apostila-analista-dados`, o mesmo do analisadedadosformacao), na tabela `public.english_progress`: uma linha por usuário com o estado completo em `jsonb`, protegida por RLS (cada usuário só acessa a própria linha).
+
+- Ao abrir o site, é criada uma conta anônima automaticamente e o progresso já vai para a nuvem.
+- Em *Progresso → Sincronização na nuvem*, vincule um e-mail para usar em outros aparelhos. O link de acesso chega por e-mail.
+- Quando o progresso local é de outra conta ou de outro aparelho, os dois são somados em vez de sobrescritos.
+- Se o Supabase estiver fora do ar, tudo continua funcionando só com o armazenamento local.
 
 ## Os livros (PDF)
 

@@ -15,7 +15,7 @@ Plataforma de estudos de inglês em três níveis, do zero ao avançado, guiada 
 - Explicação em português, escrita para a plataforma
 - Exemplos com tradução e áudio (leitura em voz alta do navegador)
 - Erros comuns de quem fala português
-- Exercícios de lacuna corrigidos na hora
+- 12 exercícios de lacuna corrigidos na hora (600 no total)
 - Quiz de múltipla escolha e flashcards
 - Lista das unidades do livro, com página e botão que abre o PDF na página certa
 - Anotações pessoais
@@ -50,6 +50,7 @@ js/app.js                lógica: trilha, módulos, quiz, flashcards, XP, PDFs
 js/data-inicial.js       conteúdo do nível Inicial
 js/data-intermediario.js conteúdo do nível Intermediário
 js/data-avancado.js      conteúdo do nível Avançado
+js/data-exercicios.js    exercícios extras de cada módulo (somados aos dos arquivos acima)
 ```
 
 Para editar o conteúdo, altere os arquivos `js/data-*.js`. Cada módulo tem `t` (título), `u` (faixa de unidades), `intro`, `pts` (explicação), `ex` (exemplos), `trap` (erros comuns), `drill` (lacunas; respostas alternativas separadas por `|`), `quiz` e `cards`.

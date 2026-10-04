@@ -153,7 +153,7 @@ const LVS=window.LV||[];
 const byLv={};
 LVS.forEach((L,li)=>{
   byLv[L.id]=L;L.idx=li;
-  L.mods.forEach((m,i)=>{m.lv=L;m.i=i;m.key=L.id+'-'+i;m.code=L.code+'-'+String(i+1).padStart(2,'0');m.units=range(m.u[0],m.u[1]);});
+  L.mods.forEach((m,i)=>{m.lv=L;m.i=i;m.key=L.id+'-'+i;m.code=L.code+'-'+String(i+1).padStart(2,'0');m.units=range(m.u[0],m.u[1]);m.drill=m.drill.concat((window.EXTRA_DRILLS||{})[m.key]||[]);});
 });
 const ALLMODS=LVS.flatMap(L=>L.mods);
 const uKey=(L,n)=>L.id+'-u'+n;

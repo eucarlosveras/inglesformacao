@@ -23,6 +23,10 @@ Plataforma de estudos de inglês em três níveis, do zero ao avançado, guiada 
 - Lista das unidades do livro, com página e botão que abre o PDF na página certa
 - Anotações pessoais
 
+## Revisão dos erros
+
+Todo erro nas lacunas, no quiz e no "Monte a frase" entra numa fila de revisão com repetição espaçada (página *Revisar*). Cada item passa por 5 etapas, com intervalos de 0, 1, 3, 7 e 16 dias: acertou, avança; errou, volta ao início; acertou na última etapa, sai da fila como "dominado". Cada sessão traz até 20 itens, e cada acerto de primeira vale 2 XP.
+
 Também tem teste de nivelamento, busca, painel de progresso, ofensiva diária, XP, modo noturno, modo foco e backup do progresso em arquivo.
 
 ## Progresso na nuvem (Supabase)

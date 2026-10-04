@@ -2,7 +2,7 @@
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const V=$('#view');
 const KEY='ingles-em-formacao-v1';
-let S={u:{},m:{},dr:{},da:{},wb:{},qz:{},notes:{},theme:null,fs:17,focus:false,last:null,gam:{xp:0,days:{}},place:null};
+let S={u:{},m:{},dr:{},da:{},wb:{},rev:{},revOk:0,qz:{},notes:{},theme:null,fs:17,focus:false,last:null,gam:{xp:0,days:{}},place:null};
 try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o)S=Object.assign(S,o);}catch(e){}
 S.gam=S.gam||{xp:0,days:{}};
 let saveT=null;
@@ -37,6 +37,7 @@ async function sbInitReal(){
 function mergeState(R){
   ['u','m','dr','wb'].forEach(k=>{S[k]=S[k]||{};Object.entries(R[k]||{}).forEach(([id,v])=>{if(!S[k][id])S[k][id]=v;});});
   S.da=Object.assign({},R.da||{},S.da||{});
+  S.rev=Object.assign({},R.rev||{},S.rev||{});S.revOk=Math.max(S.revOk||0,R.revOk||0);
   S.qz=S.qz||{};Object.entries(R.qz||{}).forEach(([k,v])=>{if(S.qz[k]==null||v>S.qz[k])S.qz[k]=v;});
   S.notes=S.notes||{};Object.entries(R.notes||{}).forEach(([k,v])=>{if(!S.notes[k]||String(v).length>String(S.notes[k]).length)S.notes[k]=v;});
   const rg=R.gam||{xp:0,days:{}};S.gam.xp=Math.max(S.gam.xp||0,rg.xp||0);
@@ -121,6 +122,7 @@ const ICO={
   trophy:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v6a5 5 0 0 1-10 0zM17 4h3.5v2.5A4 4 0 0 1 17 10.4M7 4H3.5v2.5A4 4 0 0 0 7 10.4M10 14.5h4v3h-4zM7.5 21a4.5 4.5 0 0 1 9 0z"/></svg>',
   guide:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 5.5C5 4 8.5 4 12 6c3.5-2 7-2 9.5-.5V19c-2.5-1.5-6-1.5-9.5.5-3.5-2-7-2-9.5-.5z"/><path d="M12 6v13.5"/></svg>',
   puzzle:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="6.5" height="5" rx="1.5"/><rect x="10.5" y="6" width="11" height="5" rx="1.5"/><rect x="2.5" y="13" width="10" height="5" rx="1.5"/><rect x="14" y="13" width="7.5" height="5" rx="1.5"/></svg>',
+  review:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.5-4.6L4 8"/><path d="M4 3.5V8h4.5"/><path d="M4 13a8 8 0 0 0 14.5 4.6L20 16"/><path d="M20 20.5V16h-4.5"/></svg>',
   bolt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>'
 };
 /* mascote: balãozinho de fala */
@@ -235,6 +237,7 @@ function updTop(){
   const s=streak();$('#gcstreak').textContent=s;$('#gamchip').classList.toggle('on',!!S.gam.days[dayKey()]);
   $('#gcxp').textContent=S.gam.xp||0;
   $('#gclv').textContent=gLevel();
+  const rb=$('#revbadge');if(rb){const n=revDue().length;rb.textContent=n>99?'99+':n;rb.hidden=!n;}
   if(document.body.classList.contains('has-rail'))renderRail();
 }
 function buildMenus(){if(document.body.classList.contains('has-rail'))renderRail();}
@@ -246,6 +249,7 @@ function renderRail(){
   const rec=S.place?byLv[S.place.level]:null;
   r.innerHTML=`
   <section class="rcard"><h3>Meta diária <button type="button" class="linkbtn" data-goal-edit>Editar</button></h3><div class="goal"><span class="goal-ico">${gp>=100?mascotSVG('#FF9600','wow'):`<svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" fill="#FFC800"/></svg>`}</span><div class="goal-txt"><b>${gp>=100?'Meta cumprida!':'Ganhe '+DAILY_GOAL+' XP hoje'}</b><div class="pbar"><i style="width:${gp}%;--bc:var(--orange)"></i></div><span class="pbar-n">${today} / ${DAILY_GOAL} XP · meta ${goalName().toLowerCase()}</span></div></div></section>
+  ${revRailHTML()}
   <section class="rcard"><h3>Seus níveis <a href="#/progresso">Ver tudo</a></h3>${LVS.map(L=>{const p=pct(lvUnitsDone(L),L.units.length);return `<a class="rlv" href="#/nivel/${L.id}" style="${lvStyle(L)}"><span class="rlv-dot">${L.code}</span><span class="rlv-txt">${esc(L.name)} · ${L.cefr}<div class="pbar"><i style="width:${p}%;--bc:${L.color}"></i></div></span><span class="rlv-n">${p}%</span></a>`;}).join('')}</section>
   <section class="rcard">${rec?`<h3>Nivelamento</h3><p>Seu teste indicou o nível <b>${esc(rec.name)}</b> (${rec.cefr}), com ${S.place.score}% de acertos.</p><a class="btn" href="#/nivelamento" style="width:100%">Refazer o teste</a>`:`<h3>Não sabe por onde começar?</h3><p>Faça o teste de nivelamento: 18 questões e a plataforma indica o seu nível.</p><a class="btn blue" href="#/nivelamento" style="width:100%">Fazer o teste</a>`}</section>
   <p class="rfoot">${totalDone()} de ${totalUnits()} unidades estudadas · ${Object.keys(S.m).filter(k=>S.m[k]).length} de ${ALLMODS.length} módulos</p>`;
@@ -274,13 +278,14 @@ function nextModule(){
 function route(){
   const h=decodeURIComponent(location.hash.replace(/^#\/?/,''))||'inicio';const p=h.split('/');
   const nav=p[0]==='modulo'||p[0]==='nivel'?'inicio':p[0];
-  $$('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.nav===nav||(!['modulos','nivelamento','busca','progresso','livros','inicio'].includes(nav)&&a.dataset.nav==='inicio')));
-  const rail=['inicio','modulos'].includes(p[0])||!['modulo','nivel','nivelamento','busca','progresso','livros'].includes(p[0]);
+  $$('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.nav===nav||(!['modulos','revisar','nivelamento','busca','progresso','livros','inicio'].includes(nav)&&a.dataset.nav==='inicio')));
+  const rail=['inicio','modulos'].includes(p[0])||!['modulo','nivel','revisar','nivelamento','busca','progresso','livros'].includes(p[0]);
   document.body.classList.toggle('has-rail',rail);
   closeModal();
   if(p[0]==='nivel'&&byLv[p[1]])renderLevel(byLv[p[1]]);
   else if(p[0]==='modulo'&&byLv[p[1]]&&byLv[p[1]].mods[+p[2]])renderMod(byLv[p[1]].mods[+p[2]]);
   else if(p[0]==='modulos')renderModules(p[1]);
+  else if(p[0]==='revisar')renderReview();
   else if(p[0]==='nivelamento')renderPlace();
   else if(p[0]==='busca')renderSearch(p.slice(1).join('/'));
   else if(p[0]==='progresso')renderProg();
@@ -401,7 +406,7 @@ function renderMod(m){
     <div class="side-block"><b>Outros níveis</b><div class="mini-list">${LVS.filter(x=>x!==L).map(x=>`<a class="mini-item" href="#/nivel/${x.id}"><span class="mini-dot" style="background:${x.color}"></span>${esc(x.name)} · ${x.cefr}</a>`).join('')}</div></div>
   </aside></div>`;
   bindPdf();
-  $('#bquiz').onclick=()=>openQuiz(m.code+' · '+m.t,m.quiz.map(q=>({q:q[0],o:q[1],a:q[2],e:q[3]})),sc=>{const old=S.qz[m.key];if(old==null||sc>old)S.qz[m.key]=sc;addXP(Math.round(sc/10)+5,'quiz concluído');});
+  $('#bquiz').onclick=()=>openQuiz(m.code+' · '+m.t,m.quiz.map(q=>({q:q[0],o:q[1],a:q[2],e:q[3]})),sc=>{const old=S.qz[m.key];if(old==null||sc>old)S.qz[m.key]=sc;addXP(Math.round(sc/10)+5,'quiz concluído');},{onAnswer:(i,good)=>{if(!good)revAdd('qz',m.key,i);}});
   $('#bcards').onclick=()=>openCards(m.code+' · '+m.t,m.cards);
   $('#bwb').onclick=()=>openWordBank(m);
   $('#wbcard').onclick=e=>{if(e.target.closest('[data-wb-start]'))openWordBank(m);};
@@ -410,7 +415,7 @@ function renderMod(m){
   let nt;$('#notes').oninput=e=>{S.notes[m.key]=e.target.value;clearTimeout(nt);nt=setTimeout(()=>{save();$('#nsaved').textContent='Salvo '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});},400);};
   const norm=s=>String(s).toLowerCase().replace(/[’‘`´]/g,"'").replace(/\s+/g,' ').replace(/[.!?]+$/,'').trim();
   $$('#drill input').forEach(inp=>{inp.oninput=()=>{const li=inp.closest('.dr');S.da[li.dataset.id]=inp.value;li.classList.remove('bad');save();};inp.onkeydown=e=>{if(e.key==='Enter')$('#dcheck').click();};});
-  $('#dcheck').onclick=()=>{let ok=0,gain=0;const items=$$('#drill .dr');items.forEach(li=>{const v=norm(li.querySelector('input').value);const ans=li.dataset.a.split('|').map(norm);const good=v&&ans.includes(v);li.classList.toggle('ok',good);li.classList.toggle('bad',!good);li.querySelector('.drfb').textContent=good?'✓':(v?'✗':'');if(good){ok++;if(!S.dr[li.dataset.id]){S.dr[li.dataset.id]=1;gain+=2;}}});
+  $('#dcheck').onclick=()=>{let ok=0,gain=0;const items=$$('#drill .dr');items.forEach(li=>{const v=norm(li.querySelector('input').value);const ans=li.dataset.a.split('|').map(norm);const good=v&&ans.includes(v);li.classList.toggle('ok',good);li.classList.toggle('bad',!good);li.querySelector('.drfb').textContent=good?'✓':(v?'✗':'');if(!good&&v)revAdd('dr',m.key,+li.dataset.id.split('-d').pop());if(good){ok++;if(!S.dr[li.dataset.id]){S.dr[li.dataset.id]=1;gain+=2;}}});
     $('#dscore').textContent=ok+'/'+items.length+' corretas';tone(ok===items.length?'win':ok?'ok':'bad');if(ok===items.length)confetti();if(gain)addXP(gain,'exercícios');else save();};
   $('#dshow').onclick=()=>$$('#drill .dr').forEach(li=>{if(!li.classList.contains('ok'))li.querySelector('.drfb').textContent='→ '+li.dataset.a.split('|')[0];});
   $('#dclear').onclick=()=>$$('#drill .dr').forEach(li=>{li.querySelector('input').value='';delete S.da[li.dataset.id];li.classList.remove('ok','bad');li.querySelector('.drfb').textContent='';save();});
@@ -457,7 +462,7 @@ function openQuiz(title,qs,onDone,opts={}){
     box.innerHTML=`<div class="qz-count">Questão ${i+1} de ${qs.length}${q.tag?` · <span class="diff-mark d${q.d}">${q.tag}</span>`:''}<span class="qz-score" style="margin-left:auto">${score} acerto${score===1?'':'s'}</span></div><div class="fc-progress" style="max-width:none;margin-bottom:1rem"><i class="fc-bar" style="width:${i/qs.length*100}%"></i></div>
     <div class="qz-stem">${q.q}</div><div class="qz-opts">${q.o.map((o,k)=>`<button class="qz-opt" type="button" data-k="${k}"><span class="qz-key">${keys[k]}</span><span class="qz-txt">${o}</span></button>`).join('')}</div><div class="qz-after"></div>`;
     $$('.qz-opt',box).forEach(b=>b.onclick=()=>{
-      const k=+b.dataset.k,good=k===q.a;if(good)score++;res.push(good);
+      const k=+b.dataset.k,good=k===q.a;if(good)score++;res.push(good);if(opts.onAnswer)opts.onAnswer(i,good);
       $$('.qz-opt',box).forEach(x=>{x.disabled=true;const kk=+x.dataset.k;if(kk===q.a)x.classList.add('ok');else if(kk===k)x.classList.add('bad');});
       tone(good?'ok':'bad');
       const PRAISE=['Muito bem!','Excelente!','Isso aí!','Mandou bem!','Perfeito!'];
@@ -524,7 +529,7 @@ function openWordBank(m){
       const ans=placed.map(id=>wbNorm(tiles.find(x=>x.id===id).t)).join(' ');
       const good=ans===it.w.map(wbNorm).join(' ');
       const k=m.key+'-'+it.i;
-      if(good){score++;if(!S.wb[k]){S.wb[k]=1;gain+=3;}}
+      if(good){score++;if(!S.wb[k]){S.wb[k]=1;gain+=3;}}else revAdd('wb',m.key,it.i);
       tone(good?'ok':'bad');
       line.classList.add(good?'ok':'bad');
       const PRAISE=['Muito bem!','Excelente!','Isso aí!','Mandou bem!','Perfeito!'];
@@ -544,6 +549,141 @@ function openWordBank(m){
     $('#wbagain').onclick=()=>{qi=0;score=0;gain=0;show();};
     $('#wbclose').onclick=closeModal;
     const c=$('#wbcard');if(c)c.innerHTML=wbCardHTML(m);
+  }
+  show();
+}
+
+/* ---------- revisão dos erros (repetição espaçada) ---------- */
+const REV_INT=[0,1,3,7,16];               // dias até a próxima revisão em cada etapa
+const REV_MAX=20;                          // itens por sessão
+const MODBYKEY={};ALLMODS.forEach(m=>MODBYKEY[m.key]=m);
+const dayStart=(d=new Date())=>{const x=new Date(d);x.setHours(0,0,0,0);return x.getTime();};
+function revAdd(t,k,i){
+  if(!S.rev)S.rev={};
+  const id=t+':'+k+':'+i,now=Date.now(),cur=S.rev[id];
+  S.rev[id]=cur?Object.assign(cur,{b:0,due:now,n:(cur.n||1)+1}):{t,k,i,b:0,due:now,n:1,a:now};
+  save();
+}
+function revResolve(id){
+  const r=S.rev[id];if(!r)return null;const m=MODBYKEY[r.k];if(!m)return null;
+  if(r.t==='dr'){const d=m.drill[r.i];return d?{r,m,d}:null;}
+  if(r.t==='qz'){const q=m.quiz[r.i];return q?{r,m,q}:null;}
+  if(r.t==='wb'){const w=wbItems(m).find(x=>x.i===r.i);return w?{r,m,w}:null;}
+  return null;
+}
+function revClean(){Object.keys(S.rev||{}).forEach(id=>{if(!revResolve(id))delete S.rev[id];});}
+const revDue=()=>Object.keys(S.rev||{}).filter(id=>S.rev[id].due<=Date.now());
+function revGrade(id,good){
+  const r=S.rev[id];if(!r)return false;
+  if(good){
+    const nb=r.b+1;
+    if(nb>=REV_INT.length){delete S.rev[id];S.revOk=(S.revOk||0)+1;return true;}
+    r.b=nb;r.due=dayStart()+REV_INT[nb]*864e5;
+  }else{r.b=0;r.due=dayStart()+864e5;r.n=(r.n||1)+1;}
+  return false;
+}
+const revTypeName={dr:'Lacuna',qz:'Quiz',wb:'Monte a frase'};
+function revRailHTML(){
+  const due=revDue().length,tot=Object.keys(S.rev||{}).length;
+  if(!tot)return '';
+  return `<section class="rcard rv-rail"><h3>Revisão</h3><div class="goal"><span class="goal-ico rv-ico">${ICO.review}</span><div class="goal-txt"><b>${due?due+' erro'+(due===1?'':'s')+' para revisar hoje':'Tudo revisado por hoje!'}</b><span class="pbar-n" style="margin-top:0">${tot} na fila · ${S.revOk||0} dominado${(S.revOk||0)===1?'':'s'}</span></div></div>${due?`<a class="btn blue" href="#/revisar" style="width:100%;margin-top:.9rem">Revisar agora</a>`:''}</section>`;
+}
+function renderReview(){
+  document.title='Revisar · Falaê';
+  revClean();
+  const ids=Object.keys(S.rev||{}),due=revDue().length,tot=ids.length;
+  const future=ids.map(id=>S.rev[id].due).filter(t=>t>Date.now()).sort((a,b)=>a-b)[0];
+  const byBox=REV_INT.map((_,b)=>ids.filter(id=>S.rev[id].b===b).length);
+  const byMod={};ids.forEach(id=>{const k=S.rev[id].k;byMod[k]=(byMod[k]||0)+1;});
+  const mods=Object.keys(byMod).map(k=>MODBYKEY[k]).filter(Boolean).sort((a,b)=>byMod[b.key]-byMod[a.key]);
+  V.innerHTML=`<p class="crumb"><a href="#/inicio">início</a> / revisar</p>
+  <section class="sheet rv-hero"><span class="mascot bob">${mascotSVG(due?'#1CB0F6':'#58CC02',due?'':'wow')}</span><div>
+    <h1>Revisar erros</h1>
+    <p class="sub" style="margin:.2rem 0 1rem">${!tot?'Ainda não há nada para revisar. Quando você errar uma lacuna, uma questão de quiz ou uma frase do "Monte a frase", ela entra aqui e volta nos dias seguintes até você dominar.':due?`Você tem <b>${due}</b> ite${due===1?'m':'ns'} para revisar hoje. Cada sessão traz até ${REV_MAX}.`:`Tudo revisado por hoje! A próxima revisão é ${new Date(future).toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'})}.`}</p>
+    <div class="acts">${due?`<button class="btn primary" type="button" id="rvstart">Começar revisão (${Math.min(due,REV_MAX)})</button>`:`<a class="btn" href="#/inicio">Voltar à trilha</a>`}</div>
+  </div></section>
+  ${tot||S.revOk?`<div class="grid">
+    <div class="stat"><span class="si">${ICO.review.replace('<svg','<svg fill="none" stroke="#1CB0F6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"')}</span><div><b>${due}</b>para hoje</div></div>
+    <div class="stat"><span class="si"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3" fill="none" stroke="#CE82FF" stroke-width="2.4"/><path d="M3 9h18M8 2.5v3M16 2.5v3" stroke="#CE82FF" stroke-width="2.4" stroke-linecap="round"/></svg></span><div><b>${tot}</b>na fila de revisão</div></div>
+    <div class="stat"><span class="si"><svg viewBox="0 0 24 24"><path d="M4.5 12.5l5 5L19.5 7" fill="none" stroke="#58CC02" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><b>${S.revOk||0}</b>erros dominados</div></div>
+  </div>`:''}
+  ${tot?`<h2 class="sec"><span class="hn2">01</span><span>Etapas</span></h2>
+  <p class="sub">Cada acerto passa o item para a próxima etapa, com um intervalo maior. Um erro faz ele voltar para o início. Depois da última etapa, o item sai da fila.</p>
+  <div class="rv-boxes">${REV_INT.map((d,b)=>`<div class="rv-box${byBox[b]?' on':''}"><b>${byBox[b]}</b><span>Etapa ${b+1}</span><small>${d===0?'mesmo dia':d===1?'1 dia depois':d+' dias depois'}</small></div>`).join('')}</div>
+  <h2 class="sec"><span class="hn2">02</span><span>Erros por módulo</span></h2>
+  <div class="lesson-list">${mods.map(m=>`<a class="lesson" style="${lvStyle(m.lv)}" href="#/modulo/${m.lv.id}/${m.i}"><span class="lnum">${m.code}</span><span class="ltitle">${esc(m.t)}<small>${esc(m.lv.name)} · ${m.lv.cefr}</small></span><span class="rv-count">${byMod[m.key]}</span></a>`).join('')}</div>`:''}`;
+  const b=$('#rvstart');if(b)b.onclick=openReview;
+}
+function openReview(){
+  revClean();
+  const queue=shuffle(revDue().sort((a,b)=>S.rev[a].due-S.rev[b].due).slice(0,REV_MAX)).map(id=>({id,retry:false}));
+  if(!queue.length)return;
+  let qi=0,score=0,gain=0,mastered=0;const firstTry={};
+  const w=modal('Revisão','Revisar erros','<div class="rv-wrap"></div>');
+  const box=$('.rv-wrap',w);
+  const PRAISE=['Muito bem!','Excelente!','Isso aí!','Mandou bem!','Perfeito!'];
+  function feedback(good,solHTML,after){
+    tone(good?'ok':'bad');
+    $('.rv-after',box).innerHTML=`<div class="qz-fb ${good?'ok':'bad'}"><span class="qz-fb-ico">${good?ICO.ok:ICO.x}</span><div class="qz-fb-txt"><b>${good?PRAISE[Math.floor(Math.random()*PRAISE.length)]:'Resposta correta:'}</b>${solHTML}</div><button class="btn primary" type="button" id="rvnext">${qi<queue.length-1?'Continuar':'Ver resultado'}</button></div>`;
+    $('#rvnext').onclick=()=>{qi++;qi<queue.length?show():end();};$('#rvnext').focus();
+    $('.qz-fb',box).scrollIntoView({block:'nearest',behavior:'smooth'});
+    if(after)after();
+  }
+  function grade(item,good){
+    if(firstTry[item.id]===undefined){firstTry[item.id]=good;if(good){score++;gain+=2;}}
+    if(!item.retry&&revGrade(item.id,good))mastered++;
+    if(!good&&!item.retry)queue.push({id:item.id,retry:true});
+    save();
+  }
+  function show(){
+    const item=queue[qi],R=revResolve(item.id);
+    if(!R){qi++;qi<queue.length?show():end();return;}
+    const {r,m}=R;
+    const head=`<div class="qz-count">Revisão ${qi+1} de ${queue.length}<span class="diff-mark d${m.lv.d}" style="margin-left:.4rem">${m.code}</span><span class="rv-type">${revTypeName[r.t]}${item.retry?' · nova tentativa':''}</span><span class="qz-score">${score} acerto${score===1?'':'s'}</span></div><div class="fc-progress" style="margin-bottom:1.1rem"><i class="fc-bar" style="width:${qi/queue.length*100}%"></i></div><p class="rv-mod">${esc(m.t)}</p>`;
+    if(r.t==='dr'){
+      const d=R.d,parts=d[0].split('___'),wd=Math.max(6,Math.max(...d[1].split('|').map(x=>x.length))+2);
+      box.innerHTML=head+`<p class="wb-ask">Complete a frase</p><div class="dr rv-dr">${parts[0]}<input type="text" aria-label="Resposta" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:${wd}ch">${parts.slice(1).join('___')}</div><div class="rv-after"><div class="wb-actions" style="justify-content:flex-end"><button class="btn primary" type="button" id="rvchk" disabled>Verificar</button></div></div>`;
+      const inp=$('.rv-dr input',box),chk=$('#rvchk',box);
+      const norm=x=>String(x).toLowerCase().replace(/[’‘`´]/g,"'").replace(/\s+/g,' ').replace(/[.!?]+$/,'').trim();
+      inp.oninput=()=>{chk.disabled=!inp.value.trim();};
+      inp.onkeydown=e=>{if(e.key==='Enter'&&!chk.disabled)chk.click();};
+      chk.onclick=()=>{const good=d[1].split('|').map(norm).includes(norm(inp.value));inp.disabled=true;$('.rv-dr',box).classList.add(good?'ok':'bad');grade(item,good);
+        feedback(good,`<span class="wb-sol">${esc(d[1].split('|')[0])}</span>`);};
+      inp.focus();
+    }else if(r.t==='qz'){
+      const q=R.q;
+      box.innerHTML=head+`<div class="qz-stem">${q[0]}</div><div class="qz-opts">${q[1].map((o,k)=>`<button class="qz-opt" type="button" data-k="${k}"><span class="qz-key">${'ABCD'[k]}</span><span class="qz-txt">${o}</span></button>`).join('')}</div><div class="rv-after"></div>`;
+      $$('.qz-opt',box).forEach(b=>b.onclick=()=>{const k=+b.dataset.k,good=k===q[2];
+        $$('.qz-opt',box).forEach(x=>{x.disabled=true;const kk=+x.dataset.k;if(kk===q[2])x.classList.add('ok');else if(kk===k)x.classList.add('bad');});
+        grade(item,good);feedback(good,`${good?'':`<span style="display:block;font-weight:900">${q[1][q[2]]}</span>`}${q[3]?`<span>${q[3]}</span>`:''}`);});
+    }else{
+      const it=R.w,pool=wbItems(m).flatMap(x=>x.w),tgt=new Set(it.w.map(wbNorm));
+      const extra=shuffle([...new Set(pool.filter(x=>!tgt.has(wbNorm(x))))]).slice(0,2);
+      let tiles=it.w.concat(extra).map((t,id)=>({id,t}));
+      for(let n=0;n<20;n++){tiles=shuffle(tiles);if(tiles.slice(0,it.w.length).map(x=>x.t).join(' ')!==it.w.join(' '))break;}
+      const placed=[];let locked=false;
+      box.innerHTML=head+`<p class="wb-ask">Escreva em inglês</p><div class="wb-prompt"><span class="mascot">${mascotSVG(m.lv.color)}</span><div class="wb-bubble">${esc(it.pt)}</div></div><div class="wb-line" role="list" aria-label="Sua resposta"></div><div class="wb-bank" aria-label="Palavras disponíveis"></div><div class="rv-after"><div class="wb-actions"><button class="btn" type="button" id="rvclr">Limpar</button><button class="btn primary" type="button" id="rvchk" disabled>Verificar</button></div></div>`;
+      const line=$('.wb-line',box),bank=$('.wb-bank',box),chk=$('#rvchk',box);
+      const draw=()=>{line.innerHTML=placed.map(id=>`<button type="button" class="wb-tile" data-id="${id}" role="listitem">${esc(tiles.find(x=>x.id===id).t)}</button>`).join('');
+        bank.innerHTML=tiles.map(x=>`<button type="button" class="wb-tile${placed.includes(x.id)?' ghost':''}" data-id="${x.id}"${placed.includes(x.id)?' disabled aria-hidden="true" tabindex="-1"':''}>${esc(x.t)}</button>`).join('');
+        chk.disabled=!placed.length||locked;};
+      bank.onclick=e=>{const b=e.target.closest('.wb-tile');if(!b||locked||b.disabled)return;placed.push(+b.dataset.id);tone('tap');draw();};
+      line.onclick=e=>{const b=e.target.closest('.wb-tile');if(!b||locked)return;placed.splice(placed.indexOf(+b.dataset.id),1);draw();};
+      $('#rvclr',box).onclick=()=>{if(locked)return;placed.length=0;draw();};
+      chk.onclick=()=>{locked=true;const good=placed.map(id=>wbNorm(tiles.find(x=>x.id===id).t)).join(' ')===it.w.map(wbNorm).join(' ');
+        line.classList.add(good?'ok':'bad');grade(item,good);
+        feedback(good,`<span class="wb-sol">${sayBtn(it.en)}${esc(it.en)}</span>`,()=>{if(good)speak(it.en);});};
+      draw();
+    }
+  }
+  function end(){
+    const n=Object.keys(firstTry).length,p=pct(score,n);
+    if(gain)addXP(gain,'revisão');else save();
+    if(p>=80){tone('win');confetti();}
+    box.innerHTML=`<div class="qz-result"><span class="mascot bob">${mascotSVG(p>=60?'#1CB0F6':'#FF9600',p>=80?'wow':p>=50?'':'sad')}</span><b>${p>=80?'Revisão concluída!':'Revisão feita!'}</b>
+      <div class="qz-boxes"><div class="qz-box" style="--bx:var(--blue)"><small>De primeira</small><b>${score}/${n}</b></div><div class="qz-box" style="--bx:var(--green)"><small>Dominados</small><b>${mastered}</b></div><div class="qz-box" style="--bx:var(--yellow-d)"><small>XP</small><b>+${gain}</b></div></div>
+      <span>Os acertos voltam daqui a alguns dias, com intervalos cada vez maiores. Os erros voltam amanhã.</span><div class="acts qz-ractions"><button class="btn primary" type="button" id="rvclose">Continuar</button></div></div>`;
+    $('#rvclose').onclick=()=>{closeModal();route();};
   }
   show();
 }
@@ -630,7 +770,7 @@ function renderProg(){
   $('#bsync').onclick=async()=>{if(!sb||!sbUser){toast('Nuvem indisponível agora');return;}$('#acctmsg').textContent='Sincronizando…';await sbPull();$('#acctmsg').textContent='';toast('Sincronizado');};
   $('#bexp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='ingles-progresso-'+dayKey()+'.json';a.click();};
   $('#bimp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=JSON.parse(t);if(typeof o!=='object'||!o.u)throw 0;S=Object.assign(S,o);save();applyPrefs();buildMenus();route();toast('Progresso importado');}catch(err){toast('Arquivo inválido');}});};
-  $('#breset').onclick=()=>{if(confirm('Apagar todo o progresso, anotações e XP deste navegador?')){S={u:{},m:{},dr:{},da:{},wb:{},qz:{},notes:{},theme:S.theme,fs:S.fs,focus:false,last:null,gam:{xp:0,days:{}},place:null,_uid:S._uid};save();buildMenus();route();toast('Progresso apagado');}};
+  $('#breset').onclick=()=>{if(confirm('Apagar todo o progresso, anotações e XP deste navegador?')){S={u:{},m:{},dr:{},da:{},wb:{},rev:{},revOk:0,qz:{},notes:{},theme:S.theme,fs:S.fs,focus:false,last:null,gam:{xp:0,days:{}},place:null,_uid:S._uid};save();buildMenus();route();toast('Progresso apagado');}};
 }
 
 /* ---------- livros ---------- */

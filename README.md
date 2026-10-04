@@ -45,7 +45,7 @@ Os PDFs **não fazem parte do repositório**: são material com direitos autorai
 
 ```
 index.html               página única (rotas por hash: #/inicio, #/nivel/..., #/modulo/...)
-css/style.css            visual (mesmo design system do analisadedadosformacao)
+css/style.css            visual (identidade própria: Nunito, botões 3D, trilha em caminho)
 js/app.js                lógica: trilha, módulos, quiz, flashcards, XP, PDFs
 js/data-inicial.js       conteúdo do nível Inicial
 js/data-intermediario.js conteúdo do nível Intermediário

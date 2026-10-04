@@ -187,7 +187,7 @@ function updTop(){
 function buildMenus(){
   $('#menupanel').innerHTML=LVS.map(L=>`<details${S.last&&S.last.startsWith(L.id)?' open':''}><summary><span class="dot" style="--dotc:${L.color}"></span>${esc(L.name)} <span class="diff-mark d${L.d}">${L.cefr}</span><span style="margin-left:auto;font-family:var(--f-mono);font-size:.75rem;color:var(--muted)">${pct(lvUnitsDone(L),L.units.length)}%</span></summary>
     <div class="parts"><a href="#/nivel/${L.id}"><small>▸</small>Visão geral do nível</a>${L.mods.map(m=>`<a href="#/modulo/${L.id}/${m.i}"><small>${m.code}</small>${esc(m.t)}</a>`).join('')}</div></details>`).join('')+
-    `<div class="parts" style="padding:.5rem 0 0"><a href="#/nivelamento"><small>?</small>Teste de nivelamento</a><a href="#/livros"><small>PDF</small>Meus livros (PDF)</a></div>`;
+    `<div class="parts" style="padding:.5rem 0 0"><a href="#/modulos"><small>▦</small>Todos os módulos</a><a href="#/nivelamento"><small>?</small>Teste de nivelamento</a><a href="#/livros"><small>PDF</small>Meus livros (PDF)</a></div>`;
 }
 
 /* ---------- componentes ---------- */
@@ -215,6 +215,7 @@ function route(){
   $('#modmenu').open=false;
   if(p[0]==='nivel'&&byLv[p[1]])renderLevel(byLv[p[1]]);
   else if(p[0]==='modulo'&&byLv[p[1]]&&byLv[p[1]].mods[+p[2]])renderMod(byLv[p[1]].mods[+p[2]]);
+  else if(p[0]==='modulos')renderModules(p[1]);
   else if(p[0]==='nivelamento')renderPlace();
   else if(p[0]==='busca')renderSearch(p.slice(1).join('/'));
   else if(p[0]==='progresso')renderProg();
@@ -227,7 +228,7 @@ window.addEventListener('hashchange',route);
 /* ---------- inicio ---------- */
 function renderHome(){
   document.title='Inglês em Formação';
-  const nm=nextModule(),td=totalDone(),tu=totalUnits(),st=streak();
+  const nm=nextModule(),td=totalDone(),tu=totalUnits();
   const started=td>0||Object.keys(S.m).length>0;
   const rec=S.place?byLv[S.place.level]:null;
   const curLv=nm.lv;
@@ -242,13 +243,6 @@ function renderHome(){
     ${rec?`<p class="sub" style="margin-top:.9rem">Seu nivelamento indicou: <strong>${esc(rec.name)}</strong> <span class="diff-mark d${rec.d}">${rec.cefr}</span></p>`:''}
   </div></div></section>
 
-  <div class="grid">
-    <div class="stat"><b>${td}<small style="font-size:.9rem;color:var(--faint)">/${tu}</small></b>unidades estudadas</div>
-    <div class="stat" style="--sc:var(--good)"><b>${Object.keys(S.m).filter(k=>S.m[k]).length}<small style="font-size:.9rem;color:var(--faint)">/${ALLMODS.length}</small></b>módulos concluídos</div>
-    <div class="stat" style="--sc:var(--orange)"><b>${st}</b>dia${st===1?'':'s'} de ofensiva</div>
-    <div class="stat" style="--sc:var(--ref-p)"><b>${S.gam.xp||0}</b>XP · nível ${gLevel()} (${gLevelName(gLevel())})</div>
-  </div>
-
   <h2 class="sec"><span class="hn2">01</span><span>Sua trilha</span></h2>
   <div class="metro">${LVS.map((L,i)=>{const p=pct(lvUnitsDone(L),L.units.length);const cls=p===100?'done':(L===curLv?'cur':'');
     return `<div class="stop ${cls}"><span class="node">${p===100?'✓':i+1}</span><div class="stop-body"><div>
@@ -256,9 +250,18 @@ function renderHome(){
       <div class="stop-meta">${esc(L.book)} · ${esc(L.author)} · ${L.mods.length} módulos · ${L.units.length} unidades</div>
     </div><div class="stop-r"><span class="pill">${p}%</span><a class="go" href="#/nivel/${L.id}">Abrir →</a></div></div></div>`;}).join('')}
   </div>
+  <p style="margin-top:1.4rem"><a class="btn" href="#/modulos">Ver todos os ${ALLMODS.length} módulos →</a></p>`;
+}
 
-  ${LVS.map(L=>`<div class="home-sec"><span class="diff-mark d${L.d}">${L.name}</span>${esc(L.book)}</div>
-    <div class="modgrid">${L.mods.map(m=>{const p=modPct(m);return `<a class="modp" href="#/modulo/${L.id}/${m.i}"><div class="modp-head"><span class="modp-badge" style="background:${L.color}">${m.code}</span><span class="modp-name">${esc(m.t)}</span><span class="modp-pct">${modDone(m)?'✓':p+'%'}</span></div>${barH(modDone(m)?100:p,L.color)}<div class="modp-meta">Unidades ${m.u[0]}–${m.u[1]}</div></a>`;}).join('')}</div>`).join('')}
+/* ---------- modulos ---------- */
+function renderModules(f){
+  document.title='Módulos · Inglês em Formação';
+  const sel=byLv[f]?[byLv[f]]:LVS;
+  V.innerHTML=`<p class="crumb"><a href="#/inicio">início</a> / módulos</p><h1>Módulos</h1>
+  <p class="sub">Todos os ${ALLMODS.length} módulos da trilha, em ordem de dificuldade. Cada um cobre um grupo de unidades do livro do nível.</p>
+  <div class="filters" role="group" aria-label="Filtrar por nível"><a class="btn${!byLv[f]?' primary':''}" href="#/modulos">Todos</a>${LVS.map(L=>`<a class="btn${f===L.id?' primary':''}" href="#/modulos/${L.id}"><span class="diff-mark d${L.d}">${L.cefr}</span>${esc(L.name)}</a>`).join('')}</div>
+  ${sel.map(L=>{const done=L.mods.filter(modDone).length;return `<div class="home-sec"><span class="diff-mark d${L.d}">${L.name}</span>${esc(L.book)}<span style="margin-left:auto;font-family:var(--f-mono);font-size:.78rem;font-weight:400;color:var(--muted)">${done}/${L.mods.length} concluídos</span></div>
+    <div class="modgrid">${L.mods.map(m=>{const p=modPct(m);return `<a class="modp" href="#/modulo/${L.id}/${m.i}"><div class="modp-head"><span class="modp-badge" style="background:${L.color}">${m.code}</span><span class="modp-name">${esc(m.t)}</span><span class="modp-pct">${modDone(m)?'✓':p+'%'}</span></div>${barH(modDone(m)?100:p,L.color)}<div class="modp-meta">Unidades ${m.u[0]}–${m.u[1]}</div></a>`;}).join('')}</div>`;}).join('')}
 
   <div class="call k-dica" style="margin-top:2.4rem"><div class="lab">Como estudar</div>
     <ul><li>Comece pelo <a href="#/nivelamento">teste de nivelamento</a> se não souber por qual nível começar.</li>

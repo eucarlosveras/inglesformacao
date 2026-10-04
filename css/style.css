@@ -252,6 +252,7 @@ input[type=text],input[type=search],input[type=email]{border:1px solid var(--lin
 .modrow{display:grid;grid-template-columns:minmax(0,1fr) 150px 3.2rem;gap:.7rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--soft);font-size:.92rem}
 .modrow a{color:var(--ink);text-decoration:none}.modrow a:hover{color:var(--accent)}
 .modrow .n{font-family:var(--f-mono);font-size:.78rem;text-align:right;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0 .4rem}
 .res{border-bottom:1px solid var(--line);padding:.8rem 0}
 .res a{font-weight:600}
 .res .kind{font-size:.7rem;color:var(--muted);margin-left:.5rem;font-family:var(--f-mono);border:1px solid var(--line);border-radius:4px;padding:0 .35rem}
@@ -329,7 +330,8 @@ mark.q{background:#FFE38A;color:#151A21;border-radius:2px}
 .gam-chip.on .gc-fire{fill:#FFB23E;filter:drop-shadow(0 0 5px rgba(255,150,40,.6))}
 .gam-chip.on .gc-n{color:#FFC46B}
 .gc-sep{width:1px;height:15px;background:rgba(255,255,255,.18)}
-.gc-lv{font-family:var(--f-mono);font-size:.68rem;color:rgba(233,240,250,.75);font-weight:600}
+.gc-lv{font-family:var(--f-mono);font-size:.68rem;color:rgba(233,240,250,.75);font-weight:600;white-space:nowrap}
+@media (max-width:1400px){.brand small{display:none}}
 .gm-hero{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.2rem;border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--orange) 16%,var(--panel)),var(--panel));border:1px solid var(--line);margin-bottom:1.1rem}
 .gm-flame{position:relative;width:64px;height:64px;flex:none;display:grid;place-items:center}
 .gm-flame svg{width:58px;height:58px;fill:var(--faint)}
@@ -364,7 +366,7 @@ mark.q{background:#FFE38A;color:#151A21;border-radius:2px}
   h2{font-size:1.3rem}
   .gc-sep,.gc-lv{display:none}
 }
-@media (max-width:560px){.menupanel{position:fixed;left:8px;right:8px;top:56px;width:auto}#fontbtn,#focusbtn{display:none}.ribbon .ico,.ribbon a.btn{width:36px;min-height:36px}.ribbon .menu>summary{height:36px;min-height:36px}.gam-chip{min-height:36px;padding:.3rem .55rem}.brand .logo{width:28px;height:28px}}
+@media (max-width:560px){.menupanel{position:fixed;left:8px;right:8px;top:56px;width:auto}#fontbtn,#focusbtn,#homebtn{display:none}.ribbon .ico,.ribbon a.btn{width:36px;min-height:36px}.ribbon .menu>summary{height:36px;min-height:36px}.gam-chip{min-height:36px;padding:.3rem .55rem}.brand .logo{width:28px;height:28px}}
 @media (max-width:560px){.hero{grid-template-columns:1fr;gap:.9rem}.acell{justify-self:start;font-size:1.9rem;min-width:4.4rem;height:4.4rem}.modrow{grid-template-columns:minmax(0,1fr) 80px 2.8rem}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{header.top,.study-tools,.lp-side,.lp-nav,.drill-acts{display:none!important}}

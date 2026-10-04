@@ -16,6 +16,7 @@ Plataforma de estudos de inglês em três níveis, do zero ao avançado, guiada 
 - Exemplos com tradução e áudio (leitura em voz alta do navegador)
 - Erros comuns de quem fala português
 - 12 exercícios de lacuna corrigidos na hora (600 no total)
+- "Monte a frase": a frase aparece em português e você monta em inglês tocando nas palavras embaralhadas, com duas palavras que sobram (250 frases, vindas dos exemplos de cada módulo)
 - Quiz de múltipla escolha e flashcards
 - Lista das unidades do livro, com página e botão que abre o PDF na página certa
 - Anotações pessoais

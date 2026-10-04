@@ -2,7 +2,7 @@
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const V=$('#view');
 const KEY='ingles-em-formacao-v1';
-let S={u:{},m:{},dr:{},da:{},qz:{},notes:{},theme:null,fs:17,focus:false,last:null,gam:{xp:0,days:{}},place:null};
+let S={u:{},m:{},dr:{},da:{},wb:{},qz:{},notes:{},theme:null,fs:17,focus:false,last:null,gam:{xp:0,days:{}},place:null};
 try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o)S=Object.assign(S,o);}catch(e){}
 S.gam=S.gam||{xp:0,days:{}};
 let saveT=null;
@@ -35,7 +35,7 @@ async function sbInitReal(){
 }
 /* junta dois estados sem perder progresso (usado quando o progresso local veio de outra conta/aparelho) */
 function mergeState(R){
-  ['u','m','dr'].forEach(k=>{S[k]=S[k]||{};Object.entries(R[k]||{}).forEach(([id,v])=>{if(!S[k][id])S[k][id]=v;});});
+  ['u','m','dr','wb'].forEach(k=>{S[k]=S[k]||{};Object.entries(R[k]||{}).forEach(([id,v])=>{if(!S[k][id])S[k][id]=v;});});
   S.da=Object.assign({},R.da||{},S.da||{});
   S.qz=S.qz||{};Object.entries(R.qz||{}).forEach(([k,v])=>{if(S.qz[k]==null||v>S.qz[k])S.qz[k]=v;});
   S.notes=S.notes||{};Object.entries(R.notes||{}).forEach(([k,v])=>{if(!S.notes[k]||String(v).length>String(S.notes[k]).length)S.notes[k]=v;});
@@ -120,6 +120,7 @@ const ICO={
   ok:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5L19.5 7"/></svg>',
   trophy:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v6a5 5 0 0 1-10 0zM17 4h3.5v2.5A4 4 0 0 1 17 10.4M7 4H3.5v2.5A4 4 0 0 0 7 10.4M10 14.5h4v3h-4zM7.5 21a4.5 4.5 0 0 1 9 0z"/></svg>',
   guide:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 5.5C5 4 8.5 4 12 6c3.5-2 7-2 9.5-.5V19c-2.5-1.5-6-1.5-9.5.5-3.5-2-7-2-9.5-.5z"/><path d="M12 6v13.5"/></svg>',
+  puzzle:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="6.5" height="5" rx="1.5"/><rect x="10.5" y="6" width="11" height="5" rx="1.5"/><rect x="2.5" y="13" width="10" height="5" rx="1.5"/><rect x="14" y="13" width="7.5" height="5" rx="1.5"/></svg>',
   bolt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>'
 };
 /* mascote: balãozinho de fala */
@@ -136,7 +137,7 @@ function tone(kind){
   try{
     AC=AC||new (window.AudioContext||window.webkitAudioContext)();
     const t=AC.currentTime;
-    const seq=kind==='ok'?[[784,0,'sine'],[1047,.09,'sine']]:kind==='win'?[[523,0,'triangle'],[659,.1,'triangle'],[784,.2,'triangle'],[1047,.3,'triangle']]:[[233,0,'triangle'],[196,.13,'triangle']];
+    const seq=kind==='tap'?[[520,0,'sine']]:kind==='ok'?[[784,0,'sine'],[1047,.09,'sine']]:kind==='win'?[[523,0,'triangle'],[659,.1,'triangle'],[784,.2,'triangle'],[1047,.3,'triangle']]:[[233,0,'triangle'],[196,.13,'triangle']];
     seq.forEach(([f,d,type])=>{const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.2,t+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.22);o.connect(g);g.connect(AC.destination);o.start(t+d);o.stop(t+d+.25);});
   }catch(e){}
 }
@@ -362,6 +363,7 @@ function renderMod(m){
     <h1>${esc(m.t)}</h1>
     <div class="study-tools"><span class="stt">Ferramentas</span>
       <button class="stbtn" type="button" id="bquiz">${ICO.quiz}Quiz (${m.quiz.length})</button>
+      <button class="stbtn ghost" type="button" id="bwb">${ICO.puzzle}Montar frases (${wbItems(m).length})</button>
       <button class="stbtn ghost" type="button" id="bcards">${ICO.cards}Flashcards (${m.cards.length})</button>
       <button class="stbtn ghost" type="button" data-pdf="${L.id}" data-unit="${m.u[0]}">${ICO.book}Abrir no livro</button>
     </div>
@@ -379,11 +381,15 @@ function renderMod(m){
     <ol class="drill" id="drill">${drill}</ol>
     <div class="drill-acts"><button class="btn primary" type="button" id="dcheck">Corrigir</button><button class="btn" type="button" id="dshow">Mostrar respostas</button><button class="btn" type="button" id="dclear">Limpar</button><span class="drscore" id="dscore"></span></div>
 
-    <h2 class="sec"><span class="hn2">04</span><span>Estude no livro</span></h2>
+    <h2 class="sec"><span class="hn2">04</span><span>Monte a frase</span></h2>
+    <p class="sub">Leia a frase em português e toque nas palavras, na ordem certa, para montá-la em inglês. Cuidado: há palavras que sobram. Cada frase nova vale 3 XP.</p>
+    <div class="wb-card" id="wbcard">${wbCardHTML(m)}</div>
+
+    <h2 class="sec"><span class="hn2">05</span><span>Estude no livro</span></h2>
     <p class="sub">Leia a explicação (página da esquerda) e faça os exercícios (página da direita) de cada unidade. Depois marque como estudada (+10 XP).</p>
     <div class="units">${m.units.map(n=>{const k=uKey(L,n);return `<div class="unit${S.u[k]?' done':''}"><input type="checkbox" id="u-${k}" data-u="${k}"${S.u[k]?' checked':''}><label for="u-${k}"><small>Unidade ${n} · pp. ${bookPages(n)}</small>${esc(L.units[n-1])}</label><button class="pdf" type="button" data-pdf="${L.id}" data-unit="${n}" title="Abrir a unidade ${n} no PDF">PDF p.${unitPage(L,n)} ↗</button></div>`;}).join('')}</div>
 
-    <h2 class="sec"><span class="hn2">05</span><span>Minhas anotações</span></h2>
+    <h2 class="sec"><span class="hn2">06</span><span>Minhas anotações</span></h2>
     <textarea id="notes" placeholder="Anote regras, frases que você criou, dúvidas para revisar…">${esc(S.notes[m.key]||'')}</textarea>
     <span class="saved" id="nsaved"></span>
     <div><label class="secchk"><input type="checkbox" id="mdone"${modDone(m)?' checked':''}>Concluí este módulo</label></div>
@@ -397,6 +403,8 @@ function renderMod(m){
   bindPdf();
   $('#bquiz').onclick=()=>openQuiz(m.code+' · '+m.t,m.quiz.map(q=>({q:q[0],o:q[1],a:q[2],e:q[3]})),sc=>{const old=S.qz[m.key];if(old==null||sc>old)S.qz[m.key]=sc;addXP(Math.round(sc/10)+5,'quiz concluído');});
   $('#bcards').onclick=()=>openCards(m.code+' · '+m.t,m.cards);
+  $('#bwb').onclick=()=>openWordBank(m);
+  $('#wbcard').onclick=e=>{if(e.target.closest('[data-wb-start]'))openWordBank(m);};
   $$('.unit input').forEach(c=>c.onchange=()=>{const k=c.dataset.u;if(c.checked){S.u[k]=Date.now();addXP(10,'unidade estudada');}else{delete S.u[k];save();}c.closest('.unit').classList.toggle('done',c.checked);buildMenus();});
   $('#mdone').onchange=e=>{if(e.target.checked){S.m[m.key]=Date.now();addXP(30,'módulo concluído');tone('win');confetti();}else{delete S.m[m.key];save();}buildMenus();};
   let nt;$('#notes').oninput=e=>{S.notes[m.key]=e.target.value;clearTimeout(nt);nt=setTimeout(()=>{save();$('#nsaved').textContent='Salvo '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});},400);};
@@ -467,6 +475,75 @@ function openQuiz(title,qs,onDone,opts={}){
       <span>${extra||(p>=80?'Você domina este conteúdo.':p>=50?'Revise os pontos que errou e tente de novo.':'Vale reler a explicação e as unidades do livro antes de tentar outra vez.')}</span><div class="acts qz-ractions"><button class="btn" type="button" id="qzagain">Refazer</button><button class="btn primary" type="button" id="qzclose">Continuar</button></div></div>`;
     $('#qzagain').onclick=()=>{i=0;score=0;res.length=0;show();};$('#qzclose').onclick=closeModal;
     if(onDone)onDone(p,res);
+  }
+  show();
+}
+
+/* ---------- monte a frase (banco de palavras) ---------- */
+const wbWords=s=>strip(s).replace(/—/g,' ').replace(/[.,!?;:"“”]/g,'').split(/\s+/).filter(Boolean);
+const wbNorm=w=>w.toLowerCase().replace(/[’‘`´]/g,"'");
+function wbItems(m){
+  if(!m._wb)m._wb=m.ex.map((e,i)=>({i,en:strip(e[0]).trim(),pt:strip(e[1]).trim(),w:wbWords(e[0])})).filter(it=>it.w.length>=3&&it.w.length<=14);
+  return m._wb;
+}
+function wbCardHTML(m){
+  const it=wbItems(m),done=it.filter(x=>S.wb[m.key+'-'+x.i]).length,p=pct(done,it.length);
+  return `<span class="wb-ico">${ICO.puzzle}</span><div class="wb-card-txt"><b>${done===it.length&&it.length?'Todas as frases montadas!':done?'Continue montando':'Monte '+it.length+' frases'}</b><div class="pbar"><i style="width:${p}%;--bc:var(--purple)"></i></div><span class="pbar-n">${done} / ${it.length} frases</span></div><button class="btn primary" type="button" data-wb-start>${done?'Praticar de novo':'Começar'}</button>`;
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function openWordBank(m){
+  const items=wbItems(m);if(!items.length)return;
+  const pool=items.flatMap(x=>x.w);
+  let qi=0,score=0,gain=0;
+  const w=modal('Monte a frase',m.code+' · '+m.t,'<div class="wb-wrap"></div>');
+  const box=$('.wb-wrap',w);
+  function show(){
+    const it=items[qi],tgt=new Set(it.w.map(wbNorm));
+    const extra=shuffle([...new Set(pool.filter(x=>!tgt.has(wbNorm(x))))]).slice(0,2);
+    let tiles=it.w.concat(extra).map((t,id)=>({id,t}));
+    for(let n=0;n<20;n++){tiles=shuffle(tiles);if(tiles.slice(0,it.w.length).map(x=>x.t).join(' ')!==it.w.join(' '))break;}
+    const placed=[];
+    box.innerHTML=`<div class="qz-count">Frase ${qi+1} de ${items.length}<span class="qz-score">${score} acerto${score===1?'':'s'}</span></div><div class="fc-progress" style="margin-bottom:1.2rem"><i class="fc-bar" style="width:${qi/items.length*100}%"></i></div>
+      <p class="wb-ask">Escreva em inglês</p>
+      <div class="wb-prompt"><span class="mascot">${mascotSVG(m.lv.color)}</span><div class="wb-bubble">${esc(it.pt)}</div></div>
+      <div class="wb-line" aria-label="Sua resposta" role="list"></div>
+      <div class="wb-bank" aria-label="Palavras disponíveis"></div>
+      <div class="wb-after"><div class="wb-actions"><button class="btn" type="button" data-wb="clear">Limpar</button><button class="btn primary" type="button" data-wb="check" disabled>Verificar</button></div></div>`;
+    const line=$('.wb-line',box),bank=$('.wb-bank',box),chk=$('[data-wb="check"]',box);
+    let locked=false;
+    const draw=()=>{
+      line.innerHTML=placed.map(id=>`<button type="button" class="wb-tile" data-id="${id}" role="listitem">${esc(tiles.find(x=>x.id===id).t)}</button>`).join('');
+      bank.innerHTML=tiles.map(x=>`<button type="button" class="wb-tile${placed.includes(x.id)?' ghost':''}" data-id="${x.id}"${placed.includes(x.id)?' disabled aria-hidden="true" tabindex="-1"':''}>${esc(x.t)}</button>`).join('');
+      chk.disabled=!placed.length||locked;
+    };
+    bank.onclick=e=>{const b=e.target.closest('.wb-tile');if(!b||locked||b.disabled)return;placed.push(+b.dataset.id);tone('tap');draw();};
+    line.onclick=e=>{const b=e.target.closest('.wb-tile');if(!b||locked)return;placed.splice(placed.indexOf(+b.dataset.id),1);draw();};
+    $('[data-wb="clear"]',box).onclick=()=>{if(locked)return;placed.length=0;draw();};
+    chk.onclick=()=>{
+      locked=true;
+      const ans=placed.map(id=>wbNorm(tiles.find(x=>x.id===id).t)).join(' ');
+      const good=ans===it.w.map(wbNorm).join(' ');
+      const k=m.key+'-'+it.i;
+      if(good){score++;if(!S.wb[k]){S.wb[k]=1;gain+=3;}}
+      tone(good?'ok':'bad');
+      line.classList.add(good?'ok':'bad');
+      const PRAISE=['Muito bem!','Excelente!','Isso aí!','Mandou bem!','Perfeito!'];
+      $('.wb-after',box).innerHTML=`<div class="qz-fb ${good?'ok':'bad'}"><span class="qz-fb-ico">${good?ICO.ok:ICO.x}</span><div class="qz-fb-txt"><b>${good?PRAISE[Math.floor(Math.random()*PRAISE.length)]:'Resposta correta:'}</b><span class="wb-sol">${sayBtn(it.en)}${esc(it.en)}</span></div><button class="btn primary" type="button" id="wbnext">${qi<items.length-1?'Continuar':'Ver resultado'}</button></div>`;
+      $('#wbnext').onclick=()=>{qi++;qi<items.length?show():end();};$('#wbnext').focus();
+      if(good)speak(it.en);
+    };
+    draw();
+  }
+  function end(){
+    const p=pct(score,items.length);
+    if(gain)addXP(gain,'frases montadas');else save();
+    if(p>=80){tone('win');confetti();}
+    box.innerHTML=`<div class="qz-result"><span class="mascot bob">${mascotSVG(p>=60?m.lv.color:'#FF9600',p>=80?'wow':p>=50?'':'sad')}</span><b>${p===100?'Todas certas!':p>=50?'Bom trabalho!':'Continue praticando!'}</b>
+      <div class="qz-boxes"><div class="qz-box" style="--bx:var(--purple)"><small>Frases</small><b>${score}/${items.length}</b></div><div class="qz-box" style="--bx:var(--yellow-d)"><small>XP ganho</small><b>+${gain}</b></div></div>
+      <span>${p===100?'Você montou todas as frases do módulo.':'Tente de novo: as palavras são embaralhadas a cada vez.'}</span><div class="acts qz-ractions"><button class="btn" type="button" id="wbagain">Refazer</button><button class="btn primary" type="button" id="wbclose">Continuar</button></div></div>`;
+    $('#wbagain').onclick=()=>{qi=0;score=0;gain=0;show();};
+    $('#wbclose').onclick=closeModal;
+    const c=$('#wbcard');if(c)c.innerHTML=wbCardHTML(m);
   }
   show();
 }
@@ -553,7 +630,7 @@ function renderProg(){
   $('#bsync').onclick=async()=>{if(!sb||!sbUser){toast('Nuvem indisponível agora');return;}$('#acctmsg').textContent='Sincronizando…';await sbPull();$('#acctmsg').textContent='';toast('Sincronizado');};
   $('#bexp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='ingles-progresso-'+dayKey()+'.json';a.click();};
   $('#bimp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=JSON.parse(t);if(typeof o!=='object'||!o.u)throw 0;S=Object.assign(S,o);save();applyPrefs();buildMenus();route();toast('Progresso importado');}catch(err){toast('Arquivo inválido');}});};
-  $('#breset').onclick=()=>{if(confirm('Apagar todo o progresso, anotações e XP deste navegador?')){S={u:{},m:{},dr:{},da:{},qz:{},notes:{},theme:S.theme,fs:S.fs,focus:false,last:null,gam:{xp:0,days:{}},place:null,_uid:S._uid};save();buildMenus();route();toast('Progresso apagado');}};
+  $('#breset').onclick=()=>{if(confirm('Apagar todo o progresso, anotações e XP deste navegador?')){S={u:{},m:{},dr:{},da:{},wb:{},qz:{},notes:{},theme:S.theme,fs:S.fs,focus:false,last:null,gam:{xp:0,days:{}},place:null,_uid:S._uid};save();buildMenus();route();toast('Progresso apagado');}};
 }
 
 /* ---------- livros ---------- */

@@ -457,6 +457,30 @@ mark.q{background:var(--yellow);color:#3C3C3C;border-radius:4px;padding:0 .1em}
 .goal-x{font-weight:900}
 @media (max-width:480px){.goal-d{display:none}}
 
+.wb-card{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;border:2px solid var(--line);border-radius:var(--rad);padding:1rem 1.2rem}
+.wb-ico{width:52px;height:52px;border-radius:14px;background:var(--purple);box-shadow:0 4px 0 var(--purple-d);display:grid;place-items:center;color:#fff;flex:none}
+.wb-ico svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.2}
+.wb-card-txt{flex:1 1 220px;min-width:0}
+.wb-card-txt b{display:block;margin-bottom:.4rem}
+.wb-ask{font-weight:900;font-size:1.35rem;color:var(--strong);margin:0 0 .9rem}
+.wb-prompt{display:flex;align-items:flex-end;gap:.8rem;margin-bottom:1.2rem}
+.wb-prompt .mascot{width:84px;height:84px;flex:none}
+.wb-bubble{position:relative;border:2px solid var(--line);border-radius:16px;padding:.8rem 1rem;font-weight:800;font-size:1.05rem;color:var(--strong);margin-bottom:1.6rem}
+.wb-bubble::before{content:"";position:absolute;left:-9px;bottom:14px;width:14px;height:14px;background:var(--panel);border-left:2px solid var(--line);border-bottom:2px solid var(--line);transform:rotate(45deg)}
+.wb-line{display:flex;flex-wrap:wrap;align-content:flex-start;gap:.5rem;min-height:116px;padding:.4rem 0 .8rem;background:repeating-linear-gradient(to bottom,transparent 0,transparent 55px,var(--line) 55px,var(--line) 57px);margin-bottom:1.4rem;border-radius:4px;transition:background-color .2s}
+.wb-bank{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-bottom:1.2rem}
+.wb-tile{border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;background:var(--panel);padding:.45rem .85rem;font-weight:800;font-size:1rem;color:var(--strong);min-height:46px;line-height:1.2}
+.wb-tile:hover{background:var(--soft)}
+.wb-tile:active{transform:translateY(2px);border-bottom-width:2px}
+.wb-tile.ghost{background:var(--gray-node);border-color:var(--gray-node);color:transparent;cursor:default;box-shadow:none}
+.wb-line.ok .wb-tile{border-color:var(--green);color:var(--green-t);background:var(--green-l)}
+.wb-line.bad .wb-tile{border-color:var(--red);color:var(--red-t);background:var(--red-l)}
+.wb-actions{display:flex;justify-content:space-between;gap:.7rem;border-top:2px solid var(--line);padding-top:1rem}
+.wb-actions .btn.primary{min-width:160px}
+.btn:disabled{--b:var(--line);--bd:var(--line);--bc:var(--gray-node);--tx:var(--faint);cursor:not-allowed;filter:none}
+.wb-sol{display:flex!important;align-items:center;gap:.7rem;font-weight:800!important;margin-top:.2rem}
+.wb-sol .say{margin:0 0 4px}
+
 /* confete */
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:450;overflow:hidden}
 .confetti i{position:absolute;top:-20px;width:10px;height:16px;border-radius:3px;animation:fall linear forwards}

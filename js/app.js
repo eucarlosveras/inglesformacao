@@ -2,7 +2,7 @@
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const V=$('#view');
 const KEY='ingles-em-formacao-v1';
-let S={u:{},m:{},dr:{},da:{},wb:{},rev:{},revOk:0,qz:{},notes:{},theme:null,fs:17,focus:false,last:null,gam:{xp:0,days:{}},place:null};
+let S={u:{},m:{},dr:{},da:{},wb:{},ch:{},rev:{},revOk:0,qz:{},notes:{},theme:null,fs:17,focus:false,last:null,gam:{xp:0,days:{}},place:null};
 try{const o=JSON.parse(localStorage.getItem(KEY)||'null');if(o)S=Object.assign(S,o);}catch(e){}
 S.gam=S.gam||{xp:0,days:{}};
 let saveT=null;
@@ -35,7 +35,7 @@ async function sbInitReal(){
 }
 /* junta dois estados sem perder progresso (usado quando o progresso local veio de outra conta/aparelho) */
 function mergeState(R){
-  ['u','m','dr','wb'].forEach(k=>{S[k]=S[k]||{};Object.entries(R[k]||{}).forEach(([id,v])=>{if(!S[k][id])S[k][id]=v;});});
+  ['u','m','dr','wb','ch'].forEach(k=>{S[k]=S[k]||{};Object.entries(R[k]||{}).forEach(([id,v])=>{if(!S[k][id])S[k][id]=v;});});
   S.da=Object.assign({},R.da||{},S.da||{});
   S.rev=Object.assign({},R.rev||{},S.rev||{});S.revOk=Math.max(S.revOk||0,R.revOk||0);
   S.qz=S.qz||{};Object.entries(R.qz||{}).forEach(([k,v])=>{if(S.qz[k]==null||v>S.qz[k])S.qz[k]=v;});
@@ -122,6 +122,7 @@ const ICO={
   trophy:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v6a5 5 0 0 1-10 0zM17 4h3.5v2.5A4 4 0 0 1 17 10.4M7 4H3.5v2.5A4 4 0 0 0 7 10.4M10 14.5h4v3h-4zM7.5 21a4.5 4.5 0 0 1 9 0z"/></svg>',
   guide:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 5.5C5 4 8.5 4 12 6c3.5-2 7-2 9.5-.5V19c-2.5-1.5-6-1.5-9.5.5-3.5-2-7-2-9.5-.5z"/><path d="M12 6v13.5"/></svg>',
   puzzle:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="6.5" height="5" rx="1.5"/><rect x="10.5" y="6" width="11" height="5" rx="1.5"/><rect x="2.5" y="13" width="10" height="5" rx="1.5"/><rect x="14" y="13" width="7.5" height="5" rx="1.5"/></svg>',
+  target:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/></svg>',
   review:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.5-4.6L4 8"/><path d="M4 3.5V8h4.5"/><path d="M4 13a8 8 0 0 0 14.5 4.6L20 16"/><path d="M20 20.5V16h-4.5"/></svg>',
   bolt:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>'
 };
@@ -156,7 +157,7 @@ const LVS=window.LV||[];
 const byLv={};
 LVS.forEach((L,li)=>{
   byLv[L.id]=L;L.idx=li;
-  L.mods.forEach((m,i)=>{m.lv=L;m.i=i;m.key=L.id+'-'+i;m.code=L.code+'-'+String(i+1).padStart(2,'0');m.units=range(m.u[0],m.u[1]);m.drill=m.drill.concat((window.EXTRA_DRILLS||{})[m.key]||[]);});
+  L.mods.forEach((m,i)=>{m.lv=L;m.i=i;m.key=L.id+'-'+i;m.code=L.code+'-'+String(i+1).padStart(2,'0');m.units=range(m.u[0],m.u[1]);m.drill=m.drill.concat((window.EXTRA_DRILLS||{})[m.key]||[]);m.pts=m.pts.concat((window.EXTRA_PTS||{})[m.key]||[]);m.ch=(window.CHALLENGES||{})[m.key]||null;});
 });
 const ALLMODS=LVS.flatMap(L=>L.mods);
 const uKey=(L,n)=>L.id+'-u'+n;
@@ -369,6 +370,7 @@ function renderMod(m){
     <div class="study-tools"><span class="stt">Ferramentas</span>
       <button class="stbtn" type="button" id="bquiz">${ICO.quiz}Quiz (${m.quiz.length})</button>
       <button class="stbtn ghost" type="button" id="bwb">${ICO.puzzle}Montar frases (${wbItems(m).length})</button>
+      ${m.ch?`<button class="stbtn ghost" type="button" id="bch">${ICO.target}Desafios (${chList(m).length})</button>`:''}
       <button class="stbtn ghost" type="button" id="bcards">${ICO.cards}Flashcards (${m.cards.length})</button>
       <button class="stbtn ghost" type="button" data-pdf="${L.id}" data-unit="${m.u[0]}">${ICO.book}Abrir no livro</button>
     </div>
@@ -390,11 +392,15 @@ function renderMod(m){
     <p class="sub">Leia a frase em português e toque nas palavras, na ordem certa, para montá-la em inglês. Cuidado: há palavras que sobram. Cada frase nova vale 3 XP.</p>
     <div class="wb-card" id="wbcard">${wbCardHTML(m)}</div>
 
-    <h2 class="sec"><span class="hn2">05</span><span>Estude no livro</span></h2>
+    ${m.ch?`<h2 class="sec"><span class="hn2">05</span><span>Desafios</span></h2>
+    <p class="sub">Exercícios para aplicar a regra sem dicas de tempo verbal: ${m.ch.kw?'texto com lacunas, ache o erro e reescreva com a palavra-chave':'texto com lacunas e ache o erro'}. Cada desafio novo vale 3 XP, e os erros vão para a revisão.</p>
+    <div class="wb-card ch-card" id="chcard">${chCardHTML(m)}</div>`:''}
+
+    <h2 class="sec"><span class="hn2">${m.ch?'06':'05'}</span><span>Estude no livro</span></h2>
     <p class="sub">Leia a explicação (página da esquerda) e faça os exercícios (página da direita) de cada unidade. Depois marque como estudada (+10 XP).</p>
     <div class="units">${m.units.map(n=>{const k=uKey(L,n);return `<div class="unit${S.u[k]?' done':''}"><input type="checkbox" id="u-${k}" data-u="${k}"${S.u[k]?' checked':''}><label for="u-${k}"><small>Unidade ${n} · pp. ${bookPages(n)}</small>${esc(L.units[n-1])}</label><button class="pdf" type="button" data-pdf="${L.id}" data-unit="${n}" title="Abrir a unidade ${n} no PDF">PDF p.${unitPage(L,n)} ↗</button></div>`;}).join('')}</div>
 
-    <h2 class="sec"><span class="hn2">06</span><span>Minhas anotações</span></h2>
+    <h2 class="sec"><span class="hn2">${m.ch?'07':'06'}</span><span>Minhas anotações</span></h2>
     <textarea id="notes" placeholder="Anote regras, frases que você criou, dúvidas para revisar…">${esc(S.notes[m.key]||'')}</textarea>
     <span class="saved" id="nsaved"></span>
     <div><label class="secchk"><input type="checkbox" id="mdone"${modDone(m)?' checked':''}>Concluí este módulo</label></div>
@@ -409,6 +415,7 @@ function renderMod(m){
   $('#bquiz').onclick=()=>openQuiz(m.code+' · '+m.t,m.quiz.map(q=>({q:q[0],o:q[1],a:q[2],e:q[3]})),sc=>{const old=S.qz[m.key];if(old==null||sc>old)S.qz[m.key]=sc;addXP(Math.round(sc/10)+5,'quiz concluído');},{onAnswer:(i,good)=>{if(!good)revAdd('qz',m.key,i);}});
   $('#bcards').onclick=()=>openCards(m.code+' · '+m.t,m.cards);
   $('#bwb').onclick=()=>openWordBank(m);
+  if(m.ch){$('#bch').onclick=()=>openChallenge(m);$('#chcard').onclick=e=>{if(e.target.closest('[data-ch-start]'))openChallenge(m);};}
   $('#wbcard').onclick=e=>{if(e.target.closest('[data-wb-start]'))openWordBank(m);};
   $$('.unit input').forEach(c=>c.onchange=()=>{const k=c.dataset.u;if(c.checked){S.u[k]=Date.now();addXP(10,'unidade estudada');}else{delete S.u[k];save();}c.closest('.unit').classList.toggle('done',c.checked);buildMenus();});
   $('#mdone').onchange=e=>{if(e.target.checked){S.m[m.key]=Date.now();addXP(30,'módulo concluído');tone('win');confetti();}else{delete S.m[m.key];save();}buildMenus();};
@@ -553,6 +560,93 @@ function openWordBank(m){
   show();
 }
 
+/* ---------- desafios: texto com lacunas, ache o erro, reescreva ---------- */
+const chNorm=x=>String(x).toLowerCase().replace(/[’‘`´]/g,"'").replace(/[.,!?;:"“”]/g,'').replace(/\s+/g,' ').trim();
+function chData(m,t,i){if(!m.ch)return null;if(t==='ct')return m.ch.txt?Object.assign({},m.ch.txt):null;const a=m.ch[t==='er'?'err':'kw'];return a&&a[i]?a[i]:null;}
+function chList(m){
+  if(!m.ch)return [];
+  const l=[];if(m.ch.txt)l.push({t:'ct',i:0});(m.ch.err||[]).forEach((_,i)=>l.push({t:'er',i}));(m.ch.kw||[]).forEach((_,i)=>l.push({t:'kw',i}));
+  return l;
+}
+function chCardHTML(m){
+  const l=chList(m),done=l.filter(x=>S.ch[m.key+'-'+x.t+x.i]).length,p=pct(done,l.length);
+  const parts=[m.ch.txt?'1 texto':'',m.ch.err?m.ch.err.length+' ache o erro':'',m.ch.kw?m.ch.kw.length+' reescreva':''].filter(Boolean).join(' · ');
+  return `<span class="wb-ico ch-ico">${ICO.target}</span><div class="wb-card-txt"><b>${done===l.length?'Todos os desafios concluídos!':done?'Continue os desafios':parts}</b><div class="pbar"><i style="width:${p}%;--bc:var(--orange)"></i></div><span class="pbar-n">${done} / ${l.length} desafios</span></div><button class="btn primary" type="button" data-ch-start>${done?'Praticar de novo':'Começar'}</button>`;
+}
+/* desenha um desafio em `body`; os botões ficam em `after`; chama done(acertou, htmlDaSolução) */
+function chMount(t,c,body,after,done){
+  const actions=(extra)=>`<div class="wb-actions" style="justify-content:${extra?'space-between':'flex-end'}">${extra||''}<button class="btn primary" type="button" data-ch="check" disabled>Verificar</button></div>`;
+  if(t==='ct'){
+    const re=/\[([^\]]+)\]\(([^)]*)\)/g;let html='',last=0,k=0,mt;const gaps=[];
+    while((mt=re.exec(c.s))){html+=esc(c.s.slice(last,mt.index));const a=mt[1].split('|');gaps.push(a);
+      html+=`<span class="ct-gap"><input type="text" data-g="${k}" aria-label="Lacuna ${k+1}" autocomplete="off" autocapitalize="off" spellcheck="false" style="width:${Math.max(6,Math.max(...a.map(x=>x.length))+2)}ch"><small>(${esc(mt[2])})</small></span>`;k++;last=re.lastIndex;}
+    html+=esc(c.s.slice(last));
+    body.innerHTML=`<p class="wb-ask">Complete o texto</p><div class="ct-box"><b class="ct-title">${esc(c.t)}</b><p class="ct-text">${html}</p></div>`;
+    after.innerHTML=actions();
+    const ins=$$('input',body),chk=$('[data-ch="check"]',after);
+    const upd=()=>{chk.disabled=ins.some(x=>!x.value.trim());};
+    ins.forEach((x,i)=>{x.oninput=upd;x.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();if(ins[i+1])ins[i+1].focus();else if(!chk.disabled)chk.click();}};});
+    chk.onclick=()=>{let all=true;ins.forEach((x,i)=>{const ok=gaps[i].map(chNorm).includes(chNorm(x.value));x.disabled=true;x.classList.add(ok?'ok':'bad');if(!ok){all=false;x.insertAdjacentHTML('afterend',`<em class="ct-fix">${esc(gaps[i][0])}</em>`);}});
+      done(all,all?'<span>Todas as lacunas certas.</span>':'<span>As respostas certas aparecem em verde no texto.</span>');};
+    if(ins[0])ins[0].focus();
+  }else if(t==='er'){
+    const [sent,wrong,ans,exp]=c;const toks=sent.split(' ');const core=w=>w.replace(/[.,!?;:"]/g,'');
+    const wi=toks.findIndex(w=>chNorm(core(w))===chNorm(wrong));
+    let sel=-1;
+    body.innerHTML=`<p class="wb-ask">Ache o erro</p><p class="sub" style="margin-top:-.4rem">Toque na palavra errada e escreva a correção. Se a palavra sobra, deixe a correção em branco.</p><div class="er-line">${toks.map((w,i)=>`<button type="button" class="er-tok" data-i="${i}">${esc(w)}</button>`).join(' ')}</div><div class="er-fix" hidden><label>Corrija <b class="er-sel"></b> para:</label><input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="correção (vazio = apagar)"></div>`;
+    after.innerHTML=actions();
+    const chk=$('[data-ch="check"]',after),fix=$('.er-fix',body),inp=$('.er-fix input',body);
+    $('.er-line',body).onclick=e=>{const b=e.target.closest('.er-tok');if(!b||chk.dataset.locked)return;$$('.er-tok',body).forEach(x=>x.classList.remove('sel'));b.classList.add('sel');sel=+b.dataset.i;fix.hidden=false;$('.er-sel',body).textContent=core(toks[sel]);chk.disabled=false;inp.focus();tone('tap');};
+    inp.onkeydown=e=>{if(e.key==='Enter'&&!chk.disabled)chk.click();};
+    chk.onclick=()=>{chk.dataset.locked='1';inp.disabled=true;
+      const fixes=ans.split('|').map(a=>a==='-'?'':chNorm(a));
+      const good=sel===wi&&fixes.includes(chNorm(inp.value));
+      $$('.er-tok',body).forEach((x,i)=>{x.disabled=true;if(i===wi)x.classList.add('right');else if(i===sel)x.classList.add('wrongpick');});
+      const first=ans.split('|')[0];const out=toks.map((w,i)=>i!==wi?esc(w):first==='-'?'':`<b>${esc(w.replace(core(w),first))}</b>`).filter(Boolean).join(' ');
+      done(good,`<span class="ch-sol">${out.charAt(0).toUpperCase()+out.slice(1)}</span>${exp?`<span>${exp}</span>`:''}`);};
+  }else{
+    const [orig,key,gapped,ans]=c;const parts=gapped.split('___');
+    body.innerHTML=`<p class="wb-ask">Reescreva com a palavra-chave</p><p class="sub" style="margin-top:-.4rem">Complete a segunda frase para que ela tenha o mesmo sentido da primeira. Use a palavra-chave sem mudá-la.</p><div class="kw-orig">${esc(orig)}</div><div class="kw-key">${esc(key)}</div><div class="kw-new">${esc(parts[0])}<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Complete a frase">${esc(parts[1]||'')}</div>`;
+    after.innerHTML=actions();
+    const chk=$('[data-ch="check"]',after),inp=$('.kw-new input',body);
+    inp.oninput=()=>{chk.disabled=!inp.value.trim();};inp.onkeydown=e=>{if(e.key==='Enter'&&!chk.disabled)chk.click();};
+    chk.onclick=()=>{inp.disabled=true;const good=ans.split('|').map(chNorm).includes(chNorm(inp.value));inp.classList.add(good?'ok':'bad');
+      done(good,`<span class="ch-sol">${esc(parts[0])}<b>${esc(ans.split('|')[0])}</b>${esc(parts[1]||'')}</span>`);};
+    inp.focus();
+  }
+}
+function openChallenge(m){
+  const list=chList(m);if(!list.length)return;
+  let qi=0,score=0,gain=0;
+  const w=modal('Desafios',m.code+' · '+m.t,'<div class="rv-wrap"></div>');
+  const box=$('.rv-wrap',w);
+  const PRAISE=['Muito bem!','Excelente!','Isso aí!','Mandou bem!','Perfeito!'];
+  function show(){
+    const it=list[qi],c=chData(m,it.t,it.i);
+    box.innerHTML=`<div class="qz-count">Desafio ${qi+1} de ${list.length}<span class="rv-type">${revTypeName[it.t]}</span><span class="qz-score">${score} acerto${score===1?'':'s'}</span></div><div class="fc-progress" style="margin-bottom:1.1rem"><i class="fc-bar" style="width:${qi/list.length*100}%"></i></div><div class="ch-body"></div><div class="rv-after"></div>`;
+    chMount(it.t,c,$('.ch-body',box),$('.rv-after',box),(good,sol)=>{
+      const k=m.key+'-'+it.t+it.i;
+      if(good){score++;if(!S.ch[k]){S.ch[k]=1;gain+=3;}}else revAdd(it.t,m.key,it.i);
+      tone(good?'ok':'bad');
+      $('.rv-after',box).innerHTML=`<div class="qz-fb ${good?'ok':'bad'}"><span class="qz-fb-ico">${good?ICO.ok:ICO.x}</span><div class="qz-fb-txt"><b>${good?PRAISE[Math.floor(Math.random()*PRAISE.length)]:'Resposta correta:'}</b>${sol}</div><button class="btn primary" type="button" id="chnext">${qi<list.length-1?'Continuar':'Ver resultado'}</button></div>`;
+      $('#chnext').onclick=()=>{qi++;qi<list.length?show():end();};$('#chnext').focus();
+      $('.qz-fb',box).scrollIntoView({block:'nearest',behavior:'smooth'});
+    });
+  }
+  function end(){
+    const p=pct(score,list.length);
+    if(gain)addXP(gain,'desafios');else save();
+    if(p>=80){tone('win');confetti();}
+    box.innerHTML=`<div class="qz-result"><span class="mascot bob">${mascotSVG(p>=60?m.lv.color:'#FF9600',p>=80?'wow':p>=50?'':'sad')}</span><b>${p===100?'Desafio dominado!':p>=50?'Bom trabalho!':'Continue praticando!'}</b>
+      <div class="qz-boxes"><div class="qz-box" style="--bx:var(--orange)"><small>Acertos</small><b>${score}/${list.length}</b></div><div class="qz-box" style="--bx:var(--yellow-d)"><small>XP ganho</small><b>+${gain}</b></div></div>
+      <span>${p===100?'Você aplicou a regra em todas as situações.':'Os erros foram para a fila de revisão e voltam nos próximos dias.'}</span><div class="acts qz-ractions"><button class="btn" type="button" id="chagain">Refazer</button><button class="btn primary" type="button" id="chclose">Continuar</button></div></div>`;
+    $('#chagain').onclick=()=>{qi=0;score=0;gain=0;show();};
+    $('#chclose').onclick=closeModal;
+    const cc=$('#chcard');if(cc)cc.innerHTML=chCardHTML(m);
+  }
+  show();
+}
+
 /* ---------- revisão dos erros (repetição espaçada) ---------- */
 const REV_INT=[0,1,3,7,16];               // dias até a próxima revisão em cada etapa
 const REV_MAX=20;                          // itens por sessão
@@ -569,6 +663,7 @@ function revResolve(id){
   if(r.t==='dr'){const d=m.drill[r.i];return d?{r,m,d}:null;}
   if(r.t==='qz'){const q=m.quiz[r.i];return q?{r,m,q}:null;}
   if(r.t==='wb'){const w=wbItems(m).find(x=>x.i===r.i);return w?{r,m,w}:null;}
+  if(['ct','er','kw'].includes(r.t)){const c=chData(m,r.t,r.i);return c?{r,m,c}:null;}
   return null;
 }
 function revClean(){Object.keys(S.rev||{}).forEach(id=>{if(!revResolve(id))delete S.rev[id];});}
@@ -582,7 +677,7 @@ function revGrade(id,good){
   }else{r.b=0;r.due=dayStart()+864e5;r.n=(r.n||1)+1;}
   return false;
 }
-const revTypeName={dr:'Lacuna',qz:'Quiz',wb:'Monte a frase'};
+const revTypeName={dr:'Lacuna',qz:'Quiz',wb:'Monte a frase',ct:'Texto com lacunas',er:'Ache o erro',kw:'Reescreva'};
 function revRailHTML(){
   const due=revDue().length,tot=Object.keys(S.rev||{}).length;
   if(!tot)return '';
@@ -650,6 +745,9 @@ function openReview(){
       chk.onclick=()=>{const good=d[1].split('|').map(norm).includes(norm(inp.value));inp.disabled=true;$('.rv-dr',box).classList.add(good?'ok':'bad');grade(item,good);
         feedback(good,`<span class="wb-sol">${esc(d[1].split('|')[0])}</span>`);};
       inp.focus();
+    }else if(['ct','er','kw'].includes(r.t)){
+      box.innerHTML=head+'<div class="ch-body"></div><div class="rv-after"></div>';
+      chMount(r.t,R.c,$('.ch-body',box),$('.rv-after',box),(good,sol)=>{grade(item,good);feedback(good,sol);});
     }else if(r.t==='qz'){
       const q=R.q;
       box.innerHTML=head+`<div class="qz-stem">${q[0]}</div><div class="qz-opts">${q[1].map((o,k)=>`<button class="qz-opt" type="button" data-k="${k}"><span class="qz-key">${'ABCD'[k]}</span><span class="qz-txt">${o}</span></button>`).join('')}</div><div class="rv-after"></div>`;
@@ -770,7 +868,7 @@ function renderProg(){
   $('#bsync').onclick=async()=>{if(!sb||!sbUser){toast('Nuvem indisponível agora');return;}$('#acctmsg').textContent='Sincronizando…';await sbPull();$('#acctmsg').textContent='';toast('Sincronizado');};
   $('#bexp').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='ingles-progresso-'+dayKey()+'.json';a.click();};
   $('#bimp').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const o=JSON.parse(t);if(typeof o!=='object'||!o.u)throw 0;S=Object.assign(S,o);save();applyPrefs();buildMenus();route();toast('Progresso importado');}catch(err){toast('Arquivo inválido');}});};
-  $('#breset').onclick=()=>{if(confirm('Apagar todo o progresso, anotações e XP deste navegador?')){S={u:{},m:{},dr:{},da:{},wb:{},rev:{},revOk:0,qz:{},notes:{},theme:S.theme,fs:S.fs,focus:false,last:null,gam:{xp:0,days:{}},place:null,_uid:S._uid};save();buildMenus();route();toast('Progresso apagado');}};
+  $('#breset').onclick=()=>{if(confirm('Apagar todo o progresso, anotações e XP deste navegador?')){S={u:{},m:{},dr:{},da:{},wb:{},ch:{},rev:{},revOk:0,qz:{},notes:{},theme:S.theme,fs:S.fs,focus:false,last:null,gam:{xp:0,days:{}},place:null,_uid:S._uid};save();buildMenus();route();toast('Progresso apagado');}};
 }
 
 /* ---------- livros ---------- */

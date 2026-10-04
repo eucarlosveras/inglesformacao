@@ -17,9 +17,10 @@ Plataforma de estudos de inglês em três níveis, do zero ao avançado, guiada 
 - Explicação em português, escrita para a plataforma
 - Exemplos com tradução e áudio (leitura em voz alta do navegador)
 - Erros comuns de quem fala português
-- 12 exercícios de lacuna corrigidos na hora (600 no total)
+- 12 exercícios de lacuna corrigidos na hora (18 nos módulos que cobrem 12 unidades ou mais; 642 no total)
 - "Monte a frase": a frase aparece em português e você monta em inglês tocando nas palavras embaralhadas, com duas palavras que sobram (250 frases, vindas dos exemplos de cada módulo)
 - Quiz de múltipla escolha e flashcards
+- Desafios para aplicar a regra sem dicas de tempo verbal: texto com lacunas, "ache o erro" e, no Intermediário e no Avançado, "reescreva com a palavra-chave" (formato Cambridge). São 50 textos, 200 frases com erro e 90 reescritas
 - Lista das unidades do livro, com página e botão que abre o PDF na página certa
 - Anotações pessoais
 
@@ -58,6 +59,7 @@ js/data-inicial.js       conteúdo do nível Inicial
 js/data-intermediario.js conteúdo do nível Intermediário
 js/data-avancado.js      conteúdo do nível Avançado
 js/data-exercicios.js    exercícios extras de cada módulo (somados aos dos arquivos acima)
+js/data-desafios.js      desafios de cada módulo e tópicos extras de explicação do Avançado
 ```
 
 Para editar o conteúdo, altere os arquivos `js/data-*.js`. Cada módulo tem `t` (título), `u` (faixa de unidades), `intro`, `pts` (explicação), `ex` (exemplos), `trap` (erros comuns), `drill` (lacunas; respostas alternativas separadas por `|`), `quiz` e `cards`.
